@@ -43,6 +43,15 @@ async function boot() {
     }
     await app.renderer.prepare.upload([...paths].map(path=>Assets.get(assetUrl(path))));
   }
+  const levelLoads=new Map();
+  function ensureLevelReady(index){
+    if(!levelLoads.has(index)){
+      const loading=Assets.load(pathsForLevel(levels[index])).then(()=>prepareLevel(levels[index]));
+      levelLoads.set(index,loading);
+      loading.catch(()=>{if(levelLoads.get(index)===loading)levelLoads.delete(index);});
+    }
+    return levelLoads.get(index);
+  }
   await Assets.load(pathsForLevel(levels[0]));
   const bg = new Graphics(), tileLayer = new Container(), lines = new Graphics(), effects = new Container();
   app.stage.addChild(bg,tileLayer,lines,effects);
@@ -126,15 +135,22 @@ async function boot() {
     $('queue-label').textContent=row?'待补入':'所有图块已入场';$('queue-count').textContent=row?`剩余 ${game.pending.length} 排`:'';
     updateButtons();
   }
+  function prefetchNextLevel(index,token){
+    const next=(index+1)%levels.length;
+    const start=()=>{if(token===epoch&&currentLevel===index)Assets.backgroundLoad(pathsForLevel(levels[next])).catch(()=>{});};
+    if('requestIdleCallback' in window)requestIdleCallback(start,{timeout:1500});else setTimeout(start,800);
+  }
   async function loadLevel(index){
     const token=++epoch;selected=[];hint=[];gestures?.cancel();busy=true;
     say(`第 ${levels[index].id} 关加载中…`,'',20);
-    try { await Assets.load(pathsForLevel(levels[index]));await prepareLevel(levels[index]); }
-    catch(error){if(token===epoch){busy=false;say(`关卡素材加载失败：${error.message}`,'bad',20);}return;}
-    if(token!==epoch)return;
+    try { await ensureLevelReady(index); }
+    catch(error){if(token===epoch){busy=false;say(`关卡素材加载失败：${error.message}`,'bad',20);}return false;}
+    if(token!==epoch)return false;
+    levelLoads.delete(index);
     currentLevel=index;busy=false;previousStatus='playing';
     game=new Game(levels[index]);for(const v of views.values())v.root.destroy({children:true});views.clear();effects.removeChildren().forEach(c=>c.destroy());
     $('level').value=String(index);closeModal();layout();sync();$('targets').scrollLeft=0;say('拖动连接同类图块，松手合并','',5);
+    prefetchNextLevel(index,token);return true;
   }
   function hit(p){let nearest=null,distance=Infinity;for(const t of game.tiles){const v=views.get(t.id);const dx=Math.abs(p.x-v.root.x),dy=Math.abs(p.y-v.root.y);if(dx<=cell*.52&&dy<=cell*.52&&dx+dy<distance){nearest=t.id;distance=dx+dy;}}return nearest;}
   function point(e){const r=app.canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
@@ -197,7 +213,7 @@ async function boot() {
   function burst(p){for(let i=0;i<20;i++){const g=new Graphics().roundRect(-3,-5,6,10,2).fill([0xb599e4,0x76ccbf,0xf1c978,0xed9dba][i%4]);g.position.set(p.x,p.y);effects.addChild(g);const angle=Math.random()*Math.PI*2,speed=40+Math.random()*110;tween(.65,q=>{g.x=p.x+Math.cos(angle)*speed*q;g.y=p.y+Math.sin(angle)*speed*q+80*q*q;g.rotation=q*8;g.alpha=1-q;}).then(()=>{if(!g.destroyed)g.destroy();});}}
   function openModal(html){modal=true;gestures?.cancel();selected=[];drawLine();$('overlay').hidden=false;$('modal').innerHTML=html;$('modal').focus();}
   function closeModal(){modal=false;$('overlay').hidden=true;}
-  function checkStatus(){if(game.status===previousStatus||busy)return;previousStatus=game.status;if(game.status==='won'){sound('win');openModal(`<div class="celebrate">★ ★ ★</div><h2 id="modal-title">全部归类！</h2><p>完成 ${game.level.groups.length} 个分类，使用 ${game.turn} 步。<br>${currentLevel<levels.length-1?'下一关有更多有趣的小东西等着你。':'三十个试玩关卡全部探索完毕。'}</p><button class="action primary" id="next">${currentLevel<levels.length-1?'下一关':'回到第一关'}</button><button class="action" id="again">再玩一次</button>`);$('next').onclick=()=>loadLevel((currentLevel+1)%levels.length);$('again').onclick=()=>loadLevel(currentLevel);}
+  function checkStatus(){if(game.status===previousStatus||busy)return;previousStatus=game.status;if(game.status==='won'){sound('win');openModal(`<div class="celebrate">★ ★ ★</div><h2 id="modal-title">全部归类！</h2><p>完成 ${game.level.groups.length} 个分类，使用 ${game.turn} 步。<br>${currentLevel<levels.length-1?'下一关有更多有趣的小东西等着你。':'三十个试玩关卡全部探索完毕。'}</p><button class="action primary" id="next">${currentLevel<levels.length-1?'下一关':'回到第一关'}</button><button class="action" id="again">再玩一次</button>`);const next=(currentLevel+1)%levels.length;ensureLevelReady(next).catch(()=>{});$('next').onclick=async()=>{const button=$('next');button.disabled=true;button.textContent='正在进入…';if(!await loadLevel(next)&&button.isConnected){button.disabled=false;button.textContent='重试下一关';}};$('again').onclick=()=>loadLevel(currentLevel);}
     else if(game.status==='lost'){openModal(`<div class="big-icon">↻</div><h2 id="modal-title">再试一次</h2><p>步数用完了，还差 ${game.level.groups.length-game.complete.size} 个分类。<br>试着把同类图块一次连得更长。</p><button class="action primary" id="again">重新开始</button>`);$('again').onclick=()=>loadLevel(currentLevel);}}
   $('level').onchange=e=>loadLevel(Number(e.target.value));
   $('reset').onclick=()=>{if(busy)return;loadLevel(currentLevel);};
