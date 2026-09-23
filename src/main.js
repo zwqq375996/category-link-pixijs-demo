@@ -209,13 +209,39 @@ async function boot() {
       say(messages[validation.reason]||'请重新连接图块','bad');return;
     }
     const token=epoch;busy=true;updateButtons();const valid=validation.kind==='valid';
-    if(valid){const target=views.get(ids.at(-1)).root.position.clone();sound('merge');await tween(.22,p=>{const q=p*p;for(const id of ids.slice(0,-1)){const v=views.get(id);if(!v)continue;const start=pos(game.tile(id));v.root.position.set(start.x+(target.x-start.x)*q,start.y+(target.y-start.y)*q);v.root.scale.set(1-p*.45);v.root.alpha=1-p*.7;}});}
+    const mergePoint=valid?views.get(ids.at(-1)).root.position.clone():null;
+    const lockPoints=valid?new Map(game.tiles.filter(t=>t.restriction===4).map(t=>[t.id,pos(t)])):null;
+    if(valid){sound('merge');await tween(.22,p=>{const q=p*p;for(const id of ids.slice(0,-1)){const v=views.get(id);if(!v)continue;const start=pos(game.tile(id));v.root.position.set(start.x+(mergePoint.x-start.x)*q,start.y+(mergePoint.y-start.y)*q);v.root.scale.set(1-p*.45);v.root.alpha=1-p*.7;}});}
     else{sound('wrong');await tween(.28,p=>{for(const id of ids){const t=game.tile(id),v=views.get(id);if(t&&v)v.root.x=pos(t).x+Math.sin(p*Math.PI*6)*7*(1-p);}});}
     if(token!==epoch)return;const result=game.submit(ids);
     if(result.kind==='complete'){sound('complete');burst(pos(game.tile(result.target)||{x:game.cols/2-.5,y:game.rows/2-.5}));say(`${game.level.groups[result.group].name} · 收集完成！${result.unlocked.length?` 解锁 ${result.unlocked.length} 块`:''}`,'good',3);}
     else if(result.kind==='merge')say(result.unlocked.length?`合并成功 · 解锁 ${result.unlocked.length} 块`:result.revealed.length?`合并成功 · 揭开 ${result.revealed.length} 块隐藏图块`:`合并成功 · ${result.count} / ${game.totals[result.group]}`,'good');
     else if(result.kind==='wrong')say('分类不同，少了 1 步，再试试','bad');
+    if(result.unlocked?.length){await flyKeys(mergePoint,result.unlocked.map(id=>lockPoints.get(id)).filter(Boolean));if(token!==epoch)return;}
     await sync(true);if(token!==epoch)return;busy=false;layout();updateButtons();checkStatus();
+  }
+  async function flyKeys(from,targets){
+    const token=epoch,scale=Math.max(.75,cell/90);
+    await Promise.all(targets.map(to=>{
+      const key=new Container();
+      const art=new Graphics().circle(0,0,23).fill({color:0xffe09a,alpha:.32})
+        .circle(-10,0,7).stroke({width:4,color:0xf6bd43})
+        .moveTo(-2,0).lineTo(16,0).stroke({width:5,color:0xf6bd43,cap:'round'})
+        .rect(7,1,4,7).rect(13,1,4,6).fill(0xf6bd43);
+      key.addChild(art);key.position.set(from.x,from.y);key.scale.set(scale);effects.addChild(key);
+      const control={x:(from.x+to.x)/2,y:Math.min(from.y,to.y)-Math.max(30,cell*.55)};
+      return tween(.48,p=>{
+        const q=1-(1-p)**2,r=1-q;
+        key.position.set(r*r*from.x+2*r*q*control.x+q*q*to.x,r*r*from.y+2*r*q*control.y+q*q*to.y);
+        key.scale.set(scale*(1+.2*Math.sin(p*Math.PI)));key.rotation=Math.sin(p*Math.PI)*-.25;
+      }).then(()=>{
+        if(!key.destroyed)key.destroy({children:true});
+        if(token!==epoch)return;
+        const flash=new Graphics().circle(0,0,cell*.32).stroke({width:4,color:0xffd56b,alpha:.9});
+        flash.position.set(to.x,to.y);effects.addChild(flash);
+        tween(.25,p=>{flash.alpha=1-p;flash.scale.set(1+p*.5);}).then(()=>{if(!flash.destroyed)flash.destroy();});
+      });
+    }));
   }
   function burst(p){for(let i=0;i<20;i++){const g=new Graphics().roundRect(-3,-5,6,10,2).fill([0xb599e4,0x76ccbf,0xf1c978,0xed9dba][i%4]);g.position.set(p.x,p.y);effects.addChild(g);const angle=Math.random()*Math.PI*2,speed=40+Math.random()*110;tween(.65,q=>{g.x=p.x+Math.cos(angle)*speed*q;g.y=p.y+Math.sin(angle)*speed*q+80*q*q;g.rotation=q*8;g.alpha=1-q;}).then(()=>{if(!g.destroyed)g.destroy();});}}
   function openModal(html){modal=true;gestures?.cancel();selected=[];drawLine();$('overlay').hidden=false;$('modal').innerHTML=html;$('modal').focus();}
