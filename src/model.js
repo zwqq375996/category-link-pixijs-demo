@@ -117,7 +117,7 @@ export class Game {
       tile.hiddenCounter = Math.max(0, tile.hiddenCounter - touches);
       if (!tile.hiddenCounter) revealed.push(tile.id);
     }
-    this.settle(); this.checkEnd(); this.assertValid();
+    revealed.push(...this.settle()); this.checkEnd(); this.assertValid();
     return { kind: done ? 'complete' : 'merge', group: target.group, target: target.id, removed, ids, count: sum, revealed, unlocked };
   }
   collectExtra(id) {
@@ -137,6 +137,23 @@ export class Game {
     while (y < this.rows && this.pending.length && spawned < 2) {
       const row = this.pending.shift(); row.forEach(t => { t.y = y; this.tiles.push(t); }); y++; spawned++;
     }
+    // No merge can uncover a hidden tile once every remaining category has at
+    // most one selectable tile and the queue is empty. Reveal those covers so
+    // a valid match remains possible instead of trapping the level.
+    if (this.pending.length || this.tiles.some(t => t.restriction === 7)) return [];
+    const available = new Set();
+    for (const tile of this.tiles) {
+      if (!this.selectable(tile)) continue;
+      if (available.has(tile.group)) return [];
+      available.add(tile.group);
+    }
+    const revealed = [];
+    for (const tile of this.tiles) {
+      if (!tile.hiddenCounter) continue;
+      tile.hiddenCounter = 0;
+      revealed.push(tile.id);
+    }
+    return revealed;
   }
   checkEnd() {
     if (this.complete.size === this.level.groups.length) this.status = 'won';

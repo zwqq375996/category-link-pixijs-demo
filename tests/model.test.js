@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { Game } from '../src/model.js';
 const sample = () => ({ cols:3, rows:2, moves:10, seconds:60, groups:[{name:'A'},{name:'B'}], tiles:[{group:0,image:0,x:0,y:0},{group:0,image:1,x:1,y:0},{group:1,image:0,x:2,y:0}], pending:[[{group:0,image:2,x:0,y:0},{group:1,image:1,x:1,y:0}]] });
 test('partial merge retains group inventory and final tile identity',()=>{const g=new Game(sample());const r=g.submit([1,2]);assert.equal(r.kind,'merge');assert.equal(g.tile(2).count,2);assert.equal(g.moves,9);g.assertValid();});
@@ -114,6 +115,36 @@ test('hidden tile on a path cannot be skipped to connect ordinary tiles', () => 
   const g=new Game(level);
   assert.deepEqual(g.extend([1],3),[1]);
   assert.equal(g.submit([1,2,3]).kind,'ignored');
+});
+
+test('a final hidden tile is revealed when its only visible partner cannot uncover it', () => {
+  const game=new Game({cols:2,rows:2,moves:10,groups:[{},{}],pending:[],tiles:[
+    {x:0,y:0,group:0,image:0},{x:1,y:0,group:0,image:1,hiddenCounter:1},
+    {x:0,y:1,group:1,image:0},{x:1,y:1,group:1,image:1},
+  ]});
+  assert.equal(game.selectable(game.tile(2)),false);
+  const result=game.submit([3,4]);
+  assert.deepEqual(result.revealed,[2]);
+  assert.equal(game.selectable(game.tile(2)),true);
+  assert.equal(game.submit([1,2]).kind,'complete');
+  assert.equal(game.status,'won');
+});
+
+test('level 15 remains finishable after the former hidden-tile dead end', () => {
+  const level=JSON.parse(readFileSync(new URL('../public/levels.json',import.meta.url))).levels[14];
+  const game=new Game(level);
+  let seed=level.id*18079,shuffles=0,rescued=0;
+  const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/2**32);
+  const settle=game.settle.bind(game);
+  game.settle=()=>{const revealed=settle();rescued+=revealed.length;return revealed;};
+  for(let turn=0;turn<100&&game.status==='playing';turn++){
+    const path=game.hint();
+    if(path.length>1)game.submit(path);
+    else{game.shuffle(random);shuffles++;}
+  }
+  assert.equal(game.status,'won');
+  assert.equal(rescued,1);
+  assert.ok(shuffles<30);
 });
 
 test('a matched key unlocks its paired tile, including lock id zero', () => {
