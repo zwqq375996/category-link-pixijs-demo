@@ -8,7 +8,7 @@ test('single, missing and duplicate selection is ignored',()=>{const g=new Game(
 test('line cannot silently jump over an occupied tile',()=>{const g=new Game(sample());assert.deepEqual(g.connection(1,3),[2,3]);assert.equal(g.submit([1,3]).kind,'ignored');});
 test('backtracking removes selection tail',()=>{const g=new Game(sample());assert.deepEqual(g.extend([1,2,3],1),[1]);});
 test('hint and transitions can clear all groups including queued content',()=>{const g=new Game(sample());for(let n=0;n<20&&g.status==='playing';n++){let h=g.hint();if(!h.length){g.shuffle(()=>0.3);h=g.hint();}assert.ok(h.length>1);g.submit(h);}assert.equal(g.status,'won');assert.equal(g.tiles.length,0);assert.equal(g.pending.length,0);});
-test('timeout starts only after an action and terminal input is disabled',()=>{const g=new Game(sample());g.tick(100);assert.equal(g.status,'playing');g.submit([1,2]);g.tick(61);assert.equal(g.status,'lost');const state=g.snapshot();g.submit([3,5]);assert.deepEqual(g.snapshot(),state);});
+test('time metadata never ends a level, while running out of moves still does',()=>{const d=sample();d.seconds=.001;d.moves=2;const g=new Game(d);assert.equal(g.remainingTime,undefined);assert.equal(g.tick,undefined);g.submit([1,2]);assert.equal(g.status,'playing');g.submit([2,3]);assert.equal(g.status,'lost');const state=g.snapshot();g.submit([3,5]);assert.deepEqual(g.snapshot(),state);});
 test('last legal move can still win',()=>{const d=sample();d.groups=[{name:'A'}];d.pending=[];d.tiles=d.tiles.slice(0,2);d.moves=1;const g=new Game(d);g.submit([1,2]);assert.equal(g.status,'won');});
 
 test('sparse diagonal drag and release agree on all intervening tiles', () => {

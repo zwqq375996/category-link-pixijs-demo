@@ -2,7 +2,7 @@
 export class Game {
   constructor(level) {
     this.level = level; this.cols = level.cols; this.rows = level.rows;
-    this.moves = level.moves; this.remainingTime = level.seconds; this.started = false;
+    this.moves = level.moves;
     this.complete = new Set(); this.turn = 0; this.status = 'playing'; this.serial = 0;
     this.tiles = level.tiles.map(t => this.makeTile(t));
     this.pending = level.pending.map(row => row.map(t => this.makeTile(t)));
@@ -65,7 +65,7 @@ export class Game {
     const validation = this.validateSelection(ids);
     if (validation.kind === 'ignored') return validation;
     const selected = ids.map(id => this.tile(id));
-    this.started = true; this.turn++;
+    this.turn++;
     if (this.level.moves > 0) this.moves--;
     if (validation.kind === 'wrong') {
       this.checkEnd(); return { kind: 'wrong', ids };
@@ -102,7 +102,6 @@ export class Game {
     if (this.status !== 'playing' || tile?.restriction !== 7) return { kind: 'ignored' };
     this.tiles = this.tiles.filter(t => t.id !== id);
     this.moves += tile.extraMoves;
-    this.started = true;
     this.settle(); this.checkEnd(); this.assertValid();
     return { kind: 'extraMoves', id, amount: tile.extraMoves };
   }
@@ -119,11 +118,6 @@ export class Game {
   checkEnd() {
     if (this.complete.size === this.level.groups.length) this.status = 'won';
     else if (this.level.moves > 0 && this.moves <= 0) this.status = 'lost';
-  }
-  tick(dt) {
-    if (this.status !== 'playing' || !this.started || this.level.seconds <= 0) return;
-    this.remainingTime = Math.max(0, this.remainingTime - dt);
-    if (!this.remainingTime) this.status = 'lost';
   }
   hint() {
     let best = [];

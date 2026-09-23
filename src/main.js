@@ -20,7 +20,7 @@ async function boot() {
   const appRoot = document.querySelector('#app');
   appRoot.innerHTML = `<section class="game" aria-label="Category Link 连线归类游戏">
     <header class="top"><div class="brand">CATEGORY <b>LINK</b><small>连 线 · 归 类</small></div><div class="tools-top"><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
-    <div class="hud"><div class="level-picker"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div><div class="stat"><small>剩余步数</small><strong id="moves">—</strong></div><div class="stat"><small>剩余时间</small><strong id="timer">—</strong></div></div>
+    <div class="hud"><div class="level-status"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select><span class="level-divider" aria-hidden="true"></span><span class="moves-label">剩余步数</span><strong id="moves">—</strong></div></div>
     <div class="targets-label"><span>收集所有分类</span><span id="progress">0 / 4</span></div><div class="targets" id="targets" aria-label="分类收集进度"></div>
     <div class="upcoming"><span id="queue-label">待补入</span><div class="queue" id="queue"></div><span class="queue-count" id="queue-count"></span></div>
     <div class="board" id="board" aria-label="游戏棋盘"></div>
@@ -89,8 +89,7 @@ async function boot() {
     if(ids.length>1){const ps=ids.map(id=>views.get(id)).filter(Boolean).map(v=>v.root.position);lines.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))lines.lineTo(p.x,p.y);lines.stroke({color:selected.length?color:0xd5b05e,width:Math.max(5,cell*.058),cap:'round',join:'round',alpha:selected.length?.8:.48});for(const p of ps)lines.circle(p.x,p.y,4).fill({color:0xffffff,alpha:.9});}
   }
   function updateHud(){
-    $('moves').textContent=game.level.moves>0?game.moves:'∞';$('moves').parentElement.classList.toggle('danger',game.moves<=5);
-    const secs=Math.ceil(game.remainingTime);$('timer').textContent=game.level.seconds>0?`${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`:'—';
+    $('moves').textContent=game.level.moves>0?game.moves:'∞';$('moves').parentElement.classList.toggle('danger',game.level.moves>0&&game.moves<=5);
     $('progress').textContent=`${game.complete.size} / ${game.level.groups.length}`;
     $('targets').innerHTML=game.level.groups.map((g,i)=>{const done=game.complete.has(i),largest=done?game.totals[i]:Math.max(0,...game.tiles.filter(t=>t.group===i).map(t=>t.count));return `<div class="target ${done?'done':''}" title="${escape(g.name)}"><img src="${assetUrl(g.symbol)}" alt=""><div><div class="name">${escape(g.name)}</div><div class="number">${done?'✓':largest+' / '+game.totals[i]}<span class="dot"><i style="width:${largest/game.totals[i]*100}%"></i></span></div></div></div>`;}).join('');
     const row=game.pending[0]||[];$('queue').innerHTML=row.map(t=>t.hiddenCounter?`<span class="queue-hidden" aria-label="隐藏图块">?</span>`:t.restriction===7?`<span class="queue-extra" aria-label="加 ${t.extraMoves} 步">+${t.extraMoves}</span>`:`<img src="${assetUrl(game.level.groups[t.group].images[t.image])}" alt="${escape(game.level.groups[t.group].name)}">`).join('');
@@ -105,7 +104,7 @@ async function boot() {
     if(token!==epoch)return;
     currentLevel=index;busy=false;previousStatus='playing';
     game=new Game(levels[index]);for(const v of views.values())v.root.destroy({children:true});views.clear();effects.removeChildren().forEach(c=>c.destroy());
-    game.started=false;$('level').value=String(index);closeModal();layout();sync();$('targets').scrollLeft=0;say('拖动连接同类图块，松手合并','',5);
+    $('level').value=String(index);closeModal();layout();sync();$('targets').scrollLeft=0;say('拖动连接同类图块，松手合并','',5);
   }
   function hit(p){let nearest=null,distance=Infinity;for(const t of game.tiles){const v=views.get(t.id);const dx=Math.abs(p.x-v.root.x),dy=Math.abs(p.y-v.root.y);if(dx<=cell*.52&&dy<=cell*.52&&dx+dy<distance){nearest=t.id;distance=dx+dy;}}return nearest;}
   function point(e){const r=app.canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
@@ -169,7 +168,7 @@ async function boot() {
   function openModal(html){modal=true;gestures?.cancel();selected=[];drawLine();$('overlay').hidden=false;$('modal').innerHTML=html;$('modal').focus();}
   function closeModal(){modal=false;$('overlay').hidden=true;}
   function checkStatus(){if(game.status===previousStatus||busy)return;previousStatus=game.status;if(game.status==='won'){sound('win');openModal(`<div class="celebrate">★ ★ ★</div><h2 id="modal-title">全部归类！</h2><p>完成 ${game.level.groups.length} 个分类，使用 ${game.turn} 步。<br>${currentLevel<levels.length-1?'下一关有更多有趣的小东西等着你。':'三十个试玩关卡全部探索完毕。'}</p><button class="action primary" id="next">${currentLevel<levels.length-1?'下一关':'回到第一关'}</button><button class="action" id="again">再玩一次</button>`);$('next').onclick=()=>loadLevel((currentLevel+1)%levels.length);$('again').onclick=()=>loadLevel(currentLevel);}
-    else if(game.status==='lost'){openModal(`<div class="big-icon">↻</div><h2 id="modal-title">再试一次</h2><p>${game.remainingTime<=0?'时间用完了':'步数用完了'}，还差 ${game.level.groups.length-game.complete.size} 个分类。<br>试着把同类图块一次连得更长。</p><button class="action primary" id="again">重新开始</button>`);$('again').onclick=()=>loadLevel(currentLevel);}}
+    else if(game.status==='lost'){openModal(`<div class="big-icon">↻</div><h2 id="modal-title">再试一次</h2><p>步数用完了，还差 ${game.level.groups.length-game.complete.size} 个分类。<br>试着把同类图块一次连得更长。</p><button class="action primary" id="again">重新开始</button>`);$('again').onclick=()=>loadLevel(currentLevel);}}
   $('level').onchange=e=>loadLevel(Number(e.target.value));
   $('reset').onclick=()=>{if(busy)return;loadLevel(currentLevel);};
   $('hint').onclick=()=>{if(busy||modal)return;hint=game.hint();hintUntil=time+3.5;drawLine();say(hint.length?'沿着金色连线拖动试试':'当前没有可连的同类，试试洗牌',hint.length?'good':'');};
@@ -177,10 +176,9 @@ async function boot() {
   $('sound').onclick=()=>{muted=!muted;$('sound').classList.toggle('sound-off',muted);$('sound').setAttribute('aria-label',muted?'打开声音':'关闭声音');$('sound').setAttribute('aria-pressed',String(!muted));};
   $('help').onclick=()=>{if(busy)return;openModal(`<div class="big-icon">✧</div><h2 id="modal-title">连起来，归一类</h2><dl><dt>① 拖动连线</dt><dd>按住图块，经过同一分类的其他图块，松手即可合并。往回拖可以撤回连线。</dd><dt>② 凑齐一组</dt><dd>合并后的图块显示累计数量；收齐这个分类的所有图片，就会整组消除。</dd><dt>③ 留意补行</dt><dd>棋盘空出整行后，上方预览的候补牌会按顺序入场；每次最多补两排。混合不同分类会损失一步；没有思路时可用提示和洗牌。</dd><dt>④ 特殊图块</dt><dd>隐藏图块要连周围图块逐层揭开；钥匙随有效合并解开同编号的锁；金色 +5 图块点按即可在试玩版领取步数。</dd></dl><button class="action primary" id="resume">继续游戏</button>`);$('resume').onclick=closeModal;};
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(modal&&game.status==='playing')closeModal();else{selected=[];gestures?.cancel();drawLine();}}});
-  let lastHud=0;
   app.ticker.add(ticker=>{const dt=Math.min(ticker.deltaMS/1000,.08);time+=dt;
     for(let i=tweens.length-1;i>=0;i--){const t=tweens[i];if(t.token!==epoch){tweens.splice(i,1);t.resolve();continue;}const p=Math.min(1,(time-t.start)/t.duration);t.step(p);if(p>=1){tweens.splice(i,1);t.resolve();}}
-    if(game){if(!modal&&!busy&&!document.hidden){game.tick(dt);if(game.status!==previousStatus)checkStatus();}if(time-lastHud>.4){lastHud=time;const s=Math.ceil(game.remainingTime);$('timer').textContent=game.level.seconds>0?`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`:'—';}if(hint.length&&time>=hintUntil){hint=[];drawLine();}if(messageUntil&&time>messageUntil&&!selected.length){messageUntil=0;say('拖动连接同类图块，松手合并','',0);}}});
+    if(game){if(hint.length&&time>=hintUntil){hint=[];drawLine();}if(messageUntil&&time>messageUntil&&!selected.length){messageUntil=0;say('拖动连接同类图块，松手合并','',0);}}});
   new ResizeObserver(()=>{if(!busy)layout();}).observe(board);
   loadLevel(0);
   // Read-only test visibility; actions still flow through DOM pointer handlers.

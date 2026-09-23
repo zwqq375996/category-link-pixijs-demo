@@ -4,3 +4,17 @@
 
 .queue-hidden{width:29px;height:29px;display:grid;place-items:center;border-radius:7px;background:#7764aa;color:white;font-weight:bold;font-size:18px}
 .queue-extra{width:29px;height:29px;display:grid;place-items:center;border-radius:7px;background:#ffe4a2;color:#87601e;font-weight:bold;font-size:13px}
+
+.hud{display:block}
+.level-status{height:44px;width:100%;display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:16px;background:#7160b9;color:white}
+.level-status select{flex:1;min-width:0;border:0;background:transparent;color:inherit;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer}
+.level-status option{color:#343044;background:white}
+.level-divider{width:1px;height:22px;background:#ffffff55}
+.moves-label{font-size:11px;white-space:nowrap;opacity:.85}
+.level-status #moves{font-family:Baloo,sans-serif;font-size:23px;line-height:1;min-width:26px;text-align:right}
+.level-status.danger #moves{color:#ffe49a}
+.upcoming{min-height:38px;padding:3px 2px;gap:7px;flex-shrink:0;white-space:nowrap}
+.queue{gap:3px}
+.queue img{width:25px;height:25px;padding:2px}
+.queue-hidden,.queue-extra{width:25px;height:25px;font-size:13px}
+.queue-count{font-size:13px}
