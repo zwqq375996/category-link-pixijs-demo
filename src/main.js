@@ -3,6 +3,7 @@ import 'pixi.js/prepare';
 import { Game } from './model.js';
 import { bindPointer } from './pointer.js';
 import './style.css';
+import './theme.css';
 
 const icons = {
   sound:'<path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
@@ -30,7 +31,7 @@ async function boot() {
   }
   const appRoot = document.querySelector('#app');
   appRoot.innerHTML = `<section class="game" aria-label="Link&amp;Sort 连线归类游戏">
-    <header class="top"><div class="brand"><div class="brand-title">Link<b>&amp;Sort</b></div><div class="level-choice"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
+    <header class="top"><div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><div class="brand-copy"><div class="brand-title">Link<b>&amp;</b>Sort</div><div class="level-choice"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div></div></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
     <div class="targets-label"><span>收集所有分类</span><span id="progress">0 / 4</span></div><div class="targets" id="targets" aria-label="分类收集进度"></div>
     <div class="upcoming"><span id="queue-label">待补入</span><div class="queue" id="queue"></div><span class="queue-count" id="queue-count"></span></div>
     <div class="board" id="board" aria-label="游戏棋盘"></div>
@@ -81,7 +82,11 @@ async function boot() {
     if(!game)return;cell=Math.min(112,(W-42-(game.cols-1)*gap)/game.cols,(H-28-(game.rows-1)*gap)/game.rows);
     left=(W-(game.cols*cell+(game.cols-1)*gap))/2;bottom=(H+(game.rows*cell+(game.rows-1)*gap))/2;
     bg.clear();
-    for(let y=0;y<game.rows;y++)for(let x=0;x<game.cols;x++){const p=pos({x,y});bg.roundRect(p.x-cell/2,p.y-cell/2,cell,cell,16).fill({color:0xd9d9eb,alpha:.36});}
+    for(let y=0;y<game.rows;y++)for(let x=0;x<game.cols;x++){
+      const p=pos({x,y}),r=Math.min(17,cell*.18);
+      bg.roundRect(p.x-cell/2,p.y-cell/2,cell,cell,r).fill({color:0xffffff,alpha:.055})
+        .roundRect(p.x-cell/2+.5,p.y-cell/2+.5,cell-1,cell-1,r).stroke({width:1,color:0xd9c8ee,alpha:.16});
+    }
     for(const t of game.tiles){const v=views.get(t.id);if(v){Object.assign(v.root,pos(t));drawTile(v,t);}}
     laidOutGame=game;drawLine();
   }
@@ -89,22 +94,32 @@ async function boot() {
   const tileAppearance=t=>`${t.group}:${t.image}:${t.count}:${t.hiddenCounter}:${t.restriction}:${t.extraMoves}`;
   function drawTile(v,t){
     v.appearance=tileAppearance(t);
-    v.base.clear().roundRect(-cell/2,-cell/2+4,cell,cell,Math.min(18,cell*.18)).fill(0xcac7df)
-      .roundRect(-cell/2,-cell/2,cell,cell,Math.min(18,cell*.18)).fill(t.restriction===7?0xffe7a8:t.count>1?0xf2edff:0xffffff)
-      .roundRect(-cell/2+2,-cell/2+2,cell-4,cell-4,Math.min(17,cell*.17)).stroke({width:1,color:0xffffff,alpha:.8});
+    const r=Math.min(17,cell*.18),bonus=t.restriction===7,stack=t.count>1;
+    v.base.clear().roundRect(-cell/2,-cell/2+5,cell,cell,r).fill({color:0x19152d,alpha:.37})
+      .roundRect(-cell/2,-cell/2,cell,cell,r).fill(bonus?0xffe3a4:stack?0xf0eafa:0xfffdf7)
+      .roundRect(-cell/2+1.5,-cell/2+1.5,cell-3,cell-3,r-1).stroke({width:Math.max(1.5,cell*.025),color:bonus?0xe7b85c:stack?0xb5a0d9:0xe9d7bf,alpha:.95})
+      .roundRect(-cell/2+4,-cell/2+4,cell-8,cell-8,r-3).stroke({width:1,color:0xffffff,alpha:.9});
+    if(cell>55)v.base.circle(-cell*.31,-cell*.31,Math.max(1.5,cell*.024)).fill({color:bonus?0xdca85a:0xd2bbd2,alpha:.85});
     const g=game.level.groups[t.group];const source=g&&(t.count>1?g.symbol:g.images[t.image]);
-    if(source){v.image.texture=Assets.get(assetUrl(source));const max=cell*(t.count>1?.57:.72);const scale=Math.min(max/v.image.texture.width,max/v.image.texture.height);v.image.scale.set(scale);v.image.y=t.count>1?-cell*.075:0;}
+    if(source){v.image.texture=Assets.get(assetUrl(source));const max=cell*(stack?.55:.72);const scale=Math.min(max/v.image.texture.width,max/v.image.texture.height);v.image.scale.set(scale);v.image.y=stack?-cell*.09:0;}
     v.image.visible=!!source&&!t.hiddenCounter;
     v.image.alpha=t.restriction===4?.32:1;
     v.cover.clear();v.cover.visible=!!t.hiddenCounter;v.coverCount.visible=!!t.hiddenCounter;
-    if(t.hiddenCounter){v.cover.roundRect(-cell*.44,-cell*.44,cell*.88,cell*.88,Math.min(17,cell*.17)).fill(0x7764aa);v.coverCount.text=`?  ${t.hiddenCounter}`;v.coverCount.style.fontSize=Math.max(16,cell*.25);}
+    if(t.hiddenCounter){
+      v.cover.roundRect(-cell*.45,-cell*.45,cell*.9,cell*.9,r-2).fill(0x5c4b89)
+        .roundRect(-cell*.39,-cell*.39,cell*.78,cell*.78,r-4).stroke({width:1.2,color:0xd9c6f2,alpha:.6});
+      if(cell>55)v.cover.circle(-cell*.28,-cell*.28,cell*.025).circle(cell*.28,-cell*.28,cell*.025).circle(-cell*.28,cell*.28,cell*.025).circle(cell*.28,cell*.28,cell*.025).fill({color:0xf5d490,alpha:.8});
+      v.coverCount.text=`? ${t.hiddenCounter}`;v.coverCount.style.fontSize=Math.max(16,cell*.25);
+    }
     v.special.visible=!t.hiddenCounter&&[4,5,7].includes(t.restriction);
     if(v.special.visible){v.special.text=t.restriction===4?'🔒':t.restriction===5?'🔑':`+${t.extraMoves}`;v.special.style.fontSize=t.restriction===7?Math.max(18,cell*.35):Math.max(21,cell*.32);v.special.style.fill=t.restriction===7?0x8a631e:0x3f3167;v.special.position.set(t.restriction===5?cell*.26:0,t.restriction===5?-cell*.27:0);}
+    v.badgeBack.clear();v.badgeBack.visible=stack&&!t.hiddenCounter;
+    if(stack){v.badgeBack.roundRect(-cell*.33,cell*.225,cell*.66,cell*.225,cell*.1).fill(0x7962aa);}
     v.badge.visible=t.count>1&&!t.hiddenCounter;
-    if(t.count>1){v.badge.text=`${t.count} / ${game.totals[t.group]}`;v.badge.style.fontSize=Math.max(11,cell*.14);v.badge.y=cell*.33;}
+    if(stack){v.badge.text=`${t.count} / ${game.totals[t.group]}`;v.badge.style.fontSize=Math.max(10,cell*.13);v.badge.style.fill=0xffffff;v.badge.y=cell*.335;}
     v.root.label=`tile-${t.id}`;
   }
-  function newView(t){const root=new Container(),base=new Graphics(),image=new Sprite(),badge=text('',14,0x8673ab),cover=new Graphics(),coverCount=text('',18,0xffffff),special=text('',22,0x3f3167),ring=new Graphics();image.anchor.set(.5);root.addChild(base,image,badge,cover,coverCount,special,ring);tileLayer.addChild(root);const v={root,base,image,badge,cover,coverCount,special,ring};drawTile(v,t);return v;}
+  function newView(t){const root=new Container(),base=new Graphics(),image=new Sprite(),badgeBack=new Graphics(),badge=text('',14,0xffffff),cover=new Graphics(),coverCount=text('',18,0xffffff),special=text('',22,0x3f3167),ring=new Graphics();image.anchor.set(.5);root.addChild(base,image,badgeBack,badge,cover,coverCount,special,ring);tileLayer.addChild(root);const v={root,base,image,badgeBack,badge,cover,coverCount,special,ring};drawTile(v,t);return v;}
   function sync(animate=false){
     const valid=new Set(game.tiles.map(t=>t.id));for(const[id,v]of views)if(!valid.has(id)){v.root.destroy({children:true});views.delete(id);}
     const jobs=[];
@@ -117,8 +132,8 @@ async function boot() {
   }
   function drawLine(){
     lines.clear();const ids=selected.length?selected:(time<hintUntil?hint:[]);const wrong=selected.length>1&&selected.some(id=>game.tile(id)?.group!==game.tile(selected[0])?.group);const color=wrong?0xea8798:0x70cccb;
-    for(const[id,v]of views){v.ring.clear();if(ids.includes(id)){v.ring.roundRect(-cell/2,-cell/2,cell,cell,Math.min(18,cell*.18)).stroke({width:3,color:selected.length?color:0xd5b05e});}}
-    if(ids.length>1){const ps=ids.map(id=>views.get(id)).filter(Boolean).map(v=>v.root.position);lines.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))lines.lineTo(p.x,p.y);lines.stroke({color:selected.length?color:0xd5b05e,width:Math.max(5,cell*.058),cap:'round',join:'round',alpha:selected.length?.8:.48});for(const p of ps)lines.circle(p.x,p.y,4).fill({color:0xffffff,alpha:.9});}
+    for(const[id,v]of views){v.ring.clear();if(ids.includes(id)){v.ring.roundRect(-cell/2,-cell/2,cell,cell,Math.min(18,cell*.18)).stroke({width:Math.max(3,cell*.045),color:selected.length?color:0xf4cb78});}}
+    if(ids.length>1){const ps=ids.map(id=>views.get(id)).filter(Boolean).map(v=>v.root.position);lines.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))lines.lineTo(p.x,p.y);lines.stroke({color:selected.length?color:0xf4cb78,width:Math.max(9,cell*.11),cap:'round',join:'round',alpha:.21});lines.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))lines.lineTo(p.x,p.y);lines.stroke({color:selected.length?color:0xf4cb78,width:Math.max(4,cell*.052),cap:'round',join:'round',alpha:.93});for(const p of ps)lines.circle(p.x,p.y,3.5).fill({color:0xffffff,alpha:.95});}
   }
   function updateButtons(){for(const id of ['hint','shuffle'])$(id).disabled=game.status!=='playing'||busy;}
   function updateHud(){
