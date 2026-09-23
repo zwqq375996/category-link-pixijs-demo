@@ -30,14 +30,18 @@ export class Game {
   }
   rasterConnection(fromId, toId) {
     const a = this.tile(fromId), b = this.tile(toId); if (!a || !b || a === b) return [];
-    let x = a.x, y = a.y; const dx = Math.abs(b.x - x), dy = Math.abs(b.y - y);
-    const sx = x < b.x ? 1 : -1, sy = y < b.y ? 1 : -1; let err = dx - dy; const path = [];
+    // Bresenham's tie breaks depend on traversal direction. Always rasterize
+    // in one coordinate order, then reverse the full route when needed.
+    const reverse = a.x > b.x || (a.x === b.x && a.y > b.y);
+    const start = reverse ? b : a, end = reverse ? a : b;
+    let x = start.x, y = start.y; const dx = Math.abs(end.x - x), dy = Math.abs(end.y - y);
+    const sx = x < end.x ? 1 : -1, sy = y < end.y ? 1 : -1; let err = dx - dy; const path = [start.id];
     for (let guard = 0; guard < this.cols + this.rows + 2; guard++) {
-      if (x === b.x && y === b.y) break;
+      if (x === end.x && y === end.y) break;
       const e = 2 * err; if (e > -dy) { err -= dy; x += sx; } if (e < dx) { err += dx; y += sy; }
       const t = this.at(x, y); if (t) path.push(t.id);
     }
-    return path;
+    return (reverse ? path.reverse() : path).slice(1);
   }
   extend(selection, id) {
     if (!this.selectable(this.tile(id)) || this.status !== 'playing') return selection;

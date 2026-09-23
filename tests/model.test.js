@@ -32,6 +32,18 @@ test('sparse diagonal does not omit an intervening different category', () => {
   assert.equal(g.tiles.length,4);
 });
 
+test('a line crosses the same tiles in either drag direction', () => {
+  const tiles=[];
+  for(let y=0;y<4;y++)for(let x=0;x<4;x++)tiles.push({x,y,group:(x+y)%3,image:0});
+  const game=new Game({cols:4,rows:4,moves:99,groups:[{},{},{}],tiles,pending:[]});
+  for(const a of game.tiles)for(const b of game.tiles){
+    if(a.id>=b.id)continue;
+    const forward=[a.id,...game.connection(a.id,b.id)];
+    const backward=[b.id,...game.connection(b.id,a.id)].reverse();
+    assert.deepEqual(forward,backward,`${a.x},${a.y} ↔ ${b.x},${b.y}`);
+  }
+});
+
 test('generated sparse boards: every displayed extension and backtrack is submittable', () => {
   let seed=18271;
   const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/2**32);

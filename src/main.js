@@ -232,7 +232,7 @@ async function boot() {
     if(showIntro)showMechanicIntro(index);
     prefetchNextLevel(index,token);return true;
   }
-  function hit(p){let nearest=null,distance=Infinity;for(const t of game.tiles){const v=views.get(t.id);const dx=Math.abs(p.x-v.root.x),dy=Math.abs(p.y-v.root.y);if(dx<=cell*.52&&dy<=cell*.52&&dx+dy<distance){nearest=t.id;distance=dx+dy;}}return nearest;}
+  function hit(p,reach=.52){let nearest=null,distance=Infinity;for(const t of game.tiles){const v=views.get(t.id);const dx=Math.abs(p.x-v.root.x),dy=Math.abs(p.y-v.root.y);if(dx<=cell*reach&&dy<=cell*reach&&dx+dy<distance){nearest=t.id;distance=dx+dy;}}return nearest;}
   function point(e){const r=app.canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
   function begin(id){
     if(busy||modal||game.status!=='playing'||!id)return false;
@@ -264,11 +264,13 @@ async function boot() {
   }
   gestures=bindPointer(app.canvas,window,{
     begin:e=>begin(hit(point(e))),
-    move:e=>extend(hit(point(e))),
+    // Starting a gesture is forgiving; crossing another tile requires a clearer
+    // move toward its center, so a brush along its edge does not add it.
+    move:e=>extend(hit(point(e),.4)),
     release:(e,recovered=false)=>{
       // A release on an earlier tile must not undo the already previewed chain.
       // Deliberate backtracking remains available while the pointer is moving.
-      const id=hit(point(e));
+      const id=hit(point(e),.4);
       if(!recovered&&id&&!selected.includes(id))extend(id);
       commit();
     },
