@@ -347,7 +347,7 @@ async function boot() {
     $('resume').onclick=closeModal;
   }
   function showRestartConfirmation(){
-    openModal(`<div class="big-icon">${icon('reset')}</div><h2 id="modal-title">重开第 ${levels[currentLevel].id} 关？</h2><p>本关当前进度会丢失，确定要重新开始吗？</p><button class="action primary" id="restart-confirm">确认重开</button><button class="modal-link" id="restart-cancel">取消，返回设置</button>`);
+    openModal(`<div class="big-icon">${icon('reset')}</div><h2 id="modal-title">重开第 ${levels[currentLevel].id} 关？</h2><p>本关当前进度会丢失，确定要重新开始吗？</p><button class="action primary" id="restart-confirm">确认重开</button><button class="action" id="restart-cancel">返回设置</button>`);
     $('restart-confirm').onclick=async()=>{
       const button=$('restart-confirm');button.disabled=true;button.textContent='正在重开…';
       if(!await loadLevel(currentLevel,false)&&button.isConnected){button.disabled=false;button.textContent='确认重开';}
