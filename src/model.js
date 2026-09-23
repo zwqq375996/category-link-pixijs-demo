@@ -34,12 +34,31 @@ export class Game {
     // in one coordinate order, then reverse the full route when needed.
     const reverse = a.x > b.x || (a.x === b.x && a.y > b.y);
     const start = reverse ? b : a, end = reverse ? a : b;
-    let x = start.x, y = start.y; const dx = Math.abs(end.x - x), dy = Math.abs(end.y - y);
-    const sx = x < end.x ? 1 : -1, sy = y < end.y ? 1 : -1; let err = dx - dy; const path = [start.id];
-    for (let guard = 0; guard < this.cols + this.rows + 2; guard++) {
-      if (x === end.x && y === end.y) break;
-      const e = 2 * err; if (e > -dy) { err -= dy; x += sx; } if (e < dx) { err += dx; y += sy; }
-      const t = this.at(x, y); if (t) path.push(t.id);
+    const trace = includeTies => {
+      let x = start.x, y = start.y;
+      const dx = Math.abs(end.x - x), dy = Math.abs(end.y - y);
+      const sx = x < end.x ? 1 : -1, sy = y < end.y ? 1 : -1;
+      let err = dx - dy; const path = [start.id];
+      for (let guard = 0; guard < this.cols + this.rows + 2; guard++) {
+        if (x === end.x && y === end.y) break;
+        const e = 2 * err;
+        if (includeTies ? e >= -dy : e > -dy) { err -= dy; x += sx; }
+        if (includeTies ? e <= dx : e < dx) { err += dx; y += sy; }
+        const t = this.at(x, y); if (t) path.push(t.id);
+      }
+      return path;
+    };
+    let path = trace(false);
+    // A two-by-one diagonal passes equally close to the two middle cells.
+    // Prefer the open side when the other would pull in an unrelated tile.
+    const horizontal = Math.abs(a.x - b.x), vertical = Math.abs(a.y - b.y);
+    if (a.group === b.group && Math.max(horizontal, vertical) === 2 && Math.min(horizontal, vertical) === 1) {
+      const alternative = trace(true);
+      const blockers = route => route.slice(1, -1).filter(id => {
+        const tile = this.tile(id);
+        return tile.group !== a.group || !this.selectable(tile);
+      }).length;
+      if (blockers(alternative) < blockers(path)) path = alternative;
     }
     return (reverse ? path.reverse() : path).slice(1);
   }

@@ -22,14 +22,23 @@ test('sparse diagonal drag and release agree on all intervening tiles', () => {
   assert.equal(g.status,'won');
 });
 
-test('sparse diagonal does not omit an intervening different category', () => {
+test('a corner-grazed different category can be bypassed on the open side', () => {
   const level = {cols:4, rows:6, moves:20, seconds:0, groups:[{name:'A'},{name:'B'}], pending:[],
     tiles:[{x:1,y:4,group:0},{x:1,y:2,group:0},{x:1,y:1,group:1},{x:2,y:0,group:0}].map(t=>({...t,image:0}))};
   const g = new Game(level), selection=g.extend([1],4);
-  assert.deepEqual(selection,[1,2,3,4]);
-  assert.equal(g.submit(selection).kind,'wrong');
+  assert.deepEqual(selection,[1,2,4]);
+  assert.equal(g.submit(selection).kind,'complete');
   assert.equal(g.moves,19);
-  assert.equal(g.tiles.length,4);
+  assert.equal(g.tiles.length,1);
+});
+
+test('a tile centered on a diagonal still blocks a different category match', () => {
+  const game=new Game({cols:3,rows:3,moves:10,groups:[{},{}],pending:[],tiles:[
+    {x:0,y:0,group:0},{x:1,y:1,group:1},{x:2,y:2,group:0},
+  ]});
+  assert.deepEqual(game.connection(1,3),[2,3]);
+  assert.equal(game.submit([1,3]).kind,'ignored');
+  assert.equal(game.submit(game.extend([1],3)).kind,'wrong');
 });
 
 test('a line crosses the same tiles in either drag direction', () => {
@@ -42,6 +51,20 @@ test('a line crosses the same tiles in either drag direction', () => {
     const backward=[b.id,...game.connection(b.id,a.id)].reverse();
     assert.deepEqual(forward,backward,`${a.x},${a.y} ↔ ${b.x},${b.y}`);
   }
+});
+
+test('a shallow diagonal can pass an unrelated tile on its open side', () => {
+  const level={cols:4,rows:6,moves:10,groups:[{name:'Rapper'},{name:'Students'}],pending:[],tiles:[
+    {x:1,y:5,group:0,image:0},
+    {x:2,y:5,group:1,image:0},
+    {x:3,y:4,group:0,image:1},
+  ]};
+  const game=new Game(level);
+  assert.deepEqual(game.connection(1,3),[3]);
+  assert.deepEqual(game.connection(3,1),[1]);
+  assert.equal(game.submit([1,3]).kind,'complete');
+  const blocked=new Game({...level,tiles:[...level.tiles,{x:2,y:4,group:1,image:1}]});
+  assert.equal(blocked.validateSelection([1,3]).kind,'ignored');
 });
 
 test('generated sparse boards: every displayed extension and backtrack is submittable', () => {
