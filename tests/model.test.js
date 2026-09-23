@@ -15,7 +15,7 @@ test('sparse diagonal drag and release agree on all intervening tiles', () => {
   const level = {cols:4, rows:6, moves:20, seconds:0, groups:[{name:'A'}], pending:[],
     tiles:[{x:1,y:4},{x:1,y:2},{x:1,y:1},{x:2,y:0}].map(t=>({...t,group:0,image:0}))};
   const g = new Game(level);
-  // The original raster returned [1,2,4], but release rasterized 2->4 via tile 3.
+  // The coarse raster omitted tile 3, while release included it on the last segment.
   const selection = g.extend([1],4);
   assert.deepEqual(selection,[1,2,3,4]);
   assert.equal(g.submit(selection).kind,'complete');

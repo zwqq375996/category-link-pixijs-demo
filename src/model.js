@@ -1,4 +1,4 @@
-// Independently implemented demo rules. See README for static evidence and approximations.
+// Rules for the Link&Sort browser game.
 export class Game {
   constructor(level) {
     this.level = level; this.cols = level.cols; this.rows = level.rows;
@@ -17,7 +17,7 @@ export class Game {
   connection(fromId, toId) {
     const waypoints = this.rasterConnection(fromId, toId);
     if (waypoints.length < 2) return waypoints;
-    // Rendering joins occupied tile centers, not the original raster cells. Refine
+    // Rendering joins occupied tile centers, not just the raster cells. Refine
     // each such segment until release sees exactly the same occupied waypoints.
     // Every subdivision has a strictly smaller coordinate span, so this terminates.
     const path = [];
@@ -76,7 +76,7 @@ export class Game {
     const removed = selected.filter(t => done || t.id !== target.id).map(t => t.id);
     this.tiles = this.tiles.filter(t => !removed.includes(t.id));
     if (done) this.complete.add(target.group); else target.count = sum;
-    // A selected key opens every matching lock, including id 0 (used in the source data).
+    // A selected key opens every matching lock, including id 0.
     const keyIds = new Set(selected.filter(t => t.restriction === 5).map(t => t.unlocksLockId));
     const unlocked = [];
     for (const tile of this.tiles) {
@@ -84,7 +84,7 @@ export class Game {
       if (tile.restriction === 5 && selected.includes(tile)) tile.restriction = 0;
     }
     if (ids.length >= 6 && this.level.moves > 0) this.moves++;
-    // The original linker decrements hidden tiles adjacent to a valid selection.
+    // A valid selection removes cover layers from adjacent hidden tiles.
     // A tile touched from multiple selected cells loses that many cover layers.
     const revealed = [];
     for (const tile of this.tiles) {
