@@ -5,14 +5,18 @@
 .queue-hidden{width:29px;height:29px;display:grid;place-items:center;border-radius:7px;background:#7764aa;color:white;font-weight:bold;font-size:18px}
 .queue-extra{width:29px;height:29px;display:grid;place-items:center;border-radius:7px;background:#ffe4a2;color:#87601e;font-weight:bold;font-size:13px}
 
-.hud{display:block}
-.level-status{height:44px;width:100%;display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:16px;background:#7160b9;color:white}
-.level-status select{flex:1;min-width:0;border:0;background:transparent;color:inherit;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer}
-.level-status option{color:#343044;background:white}
-.level-divider{width:1px;height:22px;background:#ffffff55}
-.moves-label{font-size:11px;white-space:nowrap;opacity:.85}
-.level-status #moves{font-family:Baloo,sans-serif;font-size:23px;line-height:1;min-width:26px;text-align:right}
-.level-status.danger #moves{color:#ffe49a}
+.top{display:flex;align-items:center;justify-content:space-between;position:relative;margin-bottom:0}
+.brand{min-width:0}
+.brand-title{font-size:19px;line-height:1;white-space:nowrap;letter-spacing:-.7px}
+.level-choice{display:flex;align-items:center;gap:5px;margin-top:5px}
+.level-choice .level-dot{width:5px;height:5px;background:#8673be;box-shadow:none;flex:none}
+.level-choice select{max-width:100%;border:0;background:transparent;color:#7461be;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.moves-status{position:absolute;left:50%;transform:translateX(-50%);min-width:66px;height:44px;padding:3px 7px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;background:#7160b9;color:white}
+.moves-status small{font-size:9px;line-height:1.1;white-space:nowrap;opacity:.9}
+.moves-status #moves{font-family:Baloo,sans-serif;font-size:21px;line-height:1.1}
+.moves-status.danger #moves{color:#ffe49a}
+@media(max-width:360px){.brand-title{font-size:17px}.moves-status{min-width:58px}.icon-btn{width:34px;height:34px}.tools-top{gap:4px}}
+@media(max-width:340px){.brand-title{font-size:16px}}
 .upcoming{min-height:38px;padding:3px 2px;gap:7px;flex-shrink:0;white-space:nowrap}
 .queue{gap:3px}
 .queue img{width:25px;height:25px;padding:2px}
