@@ -18,6 +18,16 @@ const assetUrl = path => path.startsWith('/') ? `${import.meta.env.BASE_URL}${pa
 async function boot() {
   const res = await fetch(`${import.meta.env.BASE_URL}levels.json`); if (!res.ok) throw Error('未找到关卡文件，请先运行素材准备脚本。');
   const { levels } = await res.json();
+  const mechanics=[
+    {icon:'?',title:'隐藏图块',description:'带 ? 的图块暂时不能连线。连接它上下左右相邻的图块，逐层揭开；数字归零后才能选中。',appears:t=>t.hiddenCounter>0},
+    {icon:'🔑',title:'钥匙与锁',description:'带 🔒 的图块暂时不能连线。把带 🔑 的图块与同类图块连线合并，钥匙就会飞向对应的锁并将它打开。',appears:t=>t.restriction===4||t.restriction===5},
+    {icon:'+5',title:'加步图块',description:'金色 +5 图块不用连线，直接点按就能增加 5 步。它可能出现在后续待补入的牌中。',appears:t=>t.restriction===7}
+  ];
+  const firstMechanicByLevel=new Map();
+  for(const mechanic of mechanics){
+    const index=levels.findIndex(level=>[...level.tiles,...level.pending.flat()].some(mechanic.appears));
+    if(index>=0)firstMechanicByLevel.set(index,[...(firstMechanicByLevel.get(index)||[]),mechanic]);
+  }
   const appRoot = document.querySelector('#app');
   appRoot.innerHTML = `<section class="game" aria-label="Link&amp;Sort 连线归类游戏">
     <header class="top"><div class="brand"><div class="brand-title">Link<b>&amp;Sort</b></div><div class="level-choice"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
@@ -147,7 +157,7 @@ async function boot() {
     const start=()=>{if(token===epoch&&currentLevel===index)Assets.backgroundLoad(pathsForLevel(levels[next])).catch(()=>{});};
     if('requestIdleCallback' in window)requestIdleCallback(start,{timeout:1500});else setTimeout(start,800);
   }
-  async function loadLevel(index){
+  async function loadLevel(index,showIntro=true){
     const token=++epoch;selected=[];hint=[];gestures?.cancel();busy=true;
     say(`第 ${levels[index].id} 关加载中…`,'',20);
     try { await ensureLevelReady(index); }
@@ -157,6 +167,7 @@ async function boot() {
     currentLevel=index;busy=false;previousStatus='playing';
     game=new Game(levels[index]);for(const v of views.values())v.root.destroy({children:true});views.clear();effects.removeChildren().forEach(c=>c.destroy());
     $('level').value=String(index);closeModal();layout();sync();$('targets').scrollLeft=0;say('拖动连接同类图块，松手合并','',5);
+    if(showIntro)showMechanicIntro(index);
     prefetchNextLevel(index,token);return true;
   }
   function hit(p){let nearest=null,distance=Infinity;for(const t of game.tiles){const v=views.get(t.id);const dx=Math.abs(p.x-v.root.x),dy=Math.abs(p.y-v.root.y);if(dx<=cell*.52&&dy<=cell*.52&&dx+dy<distance){nearest=t.id;distance=dx+dy;}}return nearest;}
@@ -246,10 +257,16 @@ async function boot() {
   function burst(p){for(let i=0;i<20;i++){const g=new Graphics().roundRect(-3,-5,6,10,2).fill([0xb599e4,0x76ccbf,0xf1c978,0xed9dba][i%4]);g.position.set(p.x,p.y);effects.addChild(g);const angle=Math.random()*Math.PI*2,speed=40+Math.random()*110;tween(.65,q=>{g.x=p.x+Math.cos(angle)*speed*q;g.y=p.y+Math.sin(angle)*speed*q+80*q*q;g.rotation=q*8;g.alpha=1-q;}).then(()=>{if(!g.destroyed)g.destroy();});}}
   function openModal(html){modal=true;gestures?.cancel();selected=[];drawLine();$('overlay').hidden=false;$('modal').innerHTML=html;$('modal').focus();}
   function closeModal(){modal=false;$('overlay').hidden=true;}
-  function checkStatus(){if(game.status===previousStatus||busy)return;previousStatus=game.status;if(game.status==='won'){sound('win');openModal(`<div class="celebrate">★ ★ ★</div><h2 id="modal-title">全部归类！</h2><p>完成 ${game.level.groups.length} 个分类，使用 ${game.turn} 步。<br>${currentLevel<levels.length-1?'下一关有更多有趣的小东西等着你。':'三十个试玩关卡全部探索完毕。'}</p><button class="action primary" id="next">${currentLevel<levels.length-1?'下一关':'回到第一关'}</button><button class="action" id="again">再玩一次</button>`);const next=(currentLevel+1)%levels.length;ensureLevelReady(next).catch(()=>{});$('next').onclick=async()=>{const button=$('next');button.disabled=true;button.textContent='正在进入…';if(!await loadLevel(next)&&button.isConnected){button.disabled=false;button.textContent='重试下一关';}};$('again').onclick=()=>loadLevel(currentLevel);}
-    else if(game.status==='lost'){openModal(`<div class="big-icon">↻</div><h2 id="modal-title">再试一次</h2><p>步数用完了，还差 ${game.level.groups.length-game.complete.size} 个分类。<br>试着把同类图块一次连得更长。</p><button class="action primary" id="again">重新开始</button>`);$('again').onclick=()=>loadLevel(currentLevel);}}
+  function showMechanicIntro(index){
+    const guides=firstMechanicByLevel.get(index);if(!guides?.length)return;
+    const content=guides.map(guide=>`<div class="big-icon">${guide.icon}</div><h3>${guide.title}</h3><p>${guide.description}</p>`).join('');
+    openModal(`<div class="mechanic-tag">第 ${levels[index].id} 关 · 新机制</div><h2 id="modal-title">新规则登场</h2>${content}<button class="action primary" id="resume">开始挑战</button>`);
+    $('resume').onclick=closeModal;
+  }
+  function checkStatus(){if(game.status===previousStatus||busy)return;previousStatus=game.status;if(game.status==='won'){sound('win');openModal(`<div class="celebrate">★ ★ ★</div><h2 id="modal-title">全部归类！</h2><p>完成 ${game.level.groups.length} 个分类，使用 ${game.turn} 步。<br>${currentLevel<levels.length-1?'下一关有更多有趣的小东西等着你。':'三十个试玩关卡全部探索完毕。'}</p><button class="action primary" id="next">${currentLevel<levels.length-1?'下一关':'回到第一关'}</button><button class="action" id="again">再玩一次</button>`);const next=(currentLevel+1)%levels.length;ensureLevelReady(next).catch(()=>{});$('next').onclick=async()=>{const button=$('next');button.disabled=true;button.textContent='正在进入…';if(!await loadLevel(next)&&button.isConnected){button.disabled=false;button.textContent='重试下一关';}};$('again').onclick=()=>loadLevel(currentLevel,false);}
+    else if(game.status==='lost'){openModal(`<div class="big-icon">↻</div><h2 id="modal-title">再试一次</h2><p>步数用完了，还差 ${game.level.groups.length-game.complete.size} 个分类。<br>试着把同类图块一次连得更长。</p><button class="action primary" id="again">重新开始</button>`);$('again').onclick=()=>loadLevel(currentLevel,false);}}
   $('level').onchange=e=>loadLevel(Number(e.target.value));
-  $('reset').onclick=()=>{if(busy)return;loadLevel(currentLevel);};
+  $('reset').onclick=()=>{if(busy)return;loadLevel(currentLevel,false);};
   $('hint').onclick=()=>{if(busy||modal)return;hint=game.hint();hintUntil=time+3.5;drawLine();say(hint.length?'沿着金色连线拖动试试':'当前没有可连的同类，试试洗牌',hint.length?'good':'');};
   $('shuffle').onclick=async()=>{if(busy||modal)return;busy=true;selected=[];hint=[];game.shuffle();say('图块换了位置，继续找同类吧');sound('merge');await sync(true);busy=false;layout();updateButtons();};
   $('sound').onclick=()=>{muted=!muted;$('sound').classList.toggle('sound-off',muted);$('sound').setAttribute('aria-label',muted?'打开声音':'关闭声音');$('sound').setAttribute('aria-pressed',String(!muted));};
