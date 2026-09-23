@@ -43,7 +43,7 @@ async function boot() {
     <div class="upcoming"><span id="queue-label">待补入</span><div class="queue" id="queue"></div><span class="queue-count" id="queue-count"></span></div>
     <div class="board" id="board" aria-label="游戏棋盘"></div>
     <div class="message" id="message" role="status" aria-live="polite">拖动连接同类图块，松手合并</div>
-    <div class="actions"><button class="action primary" id="hint">${icon('hint')}提示</button><button class="action" id="shuffle">${icon('shuffle')}洗牌</button><button class="action" id="reset">${icon('reset')}重开</button></div>
+    <div class="actions"><button class="action primary" id="hint">${icon('hint')}提示</button><button class="action" id="shuffle">${icon('shuffle')}洗牌</button></div>
     <div class="overlay" id="overlay" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" id="modal"></section></div>
     ${homeMarkup(levels,firstMechanicByLevel,assetUrl,escape)}
   </section>`;
@@ -323,8 +323,9 @@ async function boot() {
   function closeModal(){modal=false;$('overlay').hidden=true;}
   function showSettings(){
     if(busy)return;
-    openModal(`<div class="settings-heading-icon">${icon('settings')}</div><h2 id="modal-title">设置</h2><div class="settings-options"><button class="settings-option" id="settings-home">${icon('home')}<span>返回主页</span><span class="settings-value">›</span></button><button class="settings-option" id="settings-sound" aria-pressed="${!muted}">${icon('sound')}<span>音效</span><strong class="settings-value">${muted?'已关闭':'已开启'}</strong></button><button class="settings-option" id="settings-help">${icon('help')}<span>玩法说明</span><span class="settings-value">›</span></button></div><button class="action primary" id="resume">继续游戏</button>`);
+    openModal(`<div class="settings-heading-icon">${icon('settings')}</div><h2 id="modal-title">设置</h2><div class="settings-options"><button class="settings-option" id="settings-home">${icon('home')}<span>返回主页</span><span class="settings-value">›</span></button><button class="settings-option" id="settings-reset">${icon('reset')}<span>重开本关</span><span class="settings-value">›</span></button><button class="settings-option" id="settings-sound" aria-pressed="${!muted}">${icon('sound')}<span>音效</span><strong class="settings-value">${muted?'已关闭':'已开启'}</strong></button><button class="settings-option" id="settings-help">${icon('help')}<span>玩法说明</span><span class="settings-value">›</span></button></div><button class="action primary" id="resume">继续游戏</button>`);
     $('settings-home').onclick=showHome;
+    $('settings-reset').onclick=showRestartConfirmation;
     $('settings-sound').onclick=()=>{
       muted=!muted;
       $('settings-sound').setAttribute('aria-pressed',String(!muted));
@@ -332,6 +333,14 @@ async function boot() {
     };
     $('settings-help').onclick=showHelp;
     $('resume').onclick=closeModal;
+  }
+  function showRestartConfirmation(){
+    openModal(`<div class="big-icon">${icon('reset')}</div><h2 id="modal-title">重开第 ${levels[currentLevel].id} 关？</h2><p>本关当前进度会丢失，确定要重新开始吗？</p><button class="action primary" id="restart-confirm">确认重开</button><button class="modal-link" id="restart-cancel">取消，返回设置</button>`);
+    $('restart-confirm').onclick=async()=>{
+      const button=$('restart-confirm');button.disabled=true;button.textContent='正在重开…';
+      if(!await loadLevel(currentLevel,false)&&button.isConnected){button.disabled=false;button.textContent='确认重开';}
+    };
+    $('restart-cancel').onclick=showSettings;
   }
   function showHelp(){
     openModal(`<div class="big-icon">✧</div><h2 id="modal-title">连起来，归一类</h2><dl><dt>① 拖动连线</dt><dd>按住图块，经过同一分类的其他图块，松手即可合并。往回拖可以撤回连线。</dd><dt>② 凑齐一组</dt><dd>合并后的图块显示累计数量；收齐这个分类的所有图片，就会整组消除。</dd><dt>③ 留意补行</dt><dd>棋盘空出整行后，上方预览的候补牌会按顺序入场；每次最多补两排。混合不同分类会损失一步；没有思路时可用提示和洗牌。</dd><dt>④ 特殊图块</dt><dd>隐藏图块要连周围图块逐层揭开；钥匙随有效合并解开同编号的锁；金色 +5 图块点按即可增加步数。</dd></dl><button class="action primary" id="settings-back">返回设置</button><button class="modal-link" id="resume">继续游戏</button>`);
@@ -396,7 +405,6 @@ async function boot() {
     finally{homeWorking=false;}
   }
   $('level').onchange=e=>loadLevel(Number(e.target.value));
-  $('reset').onclick=()=>{if(busy)return;loadLevel(currentLevel,false);};
   $('settings').onclick=showSettings;
   $('home-choose').onclick=()=>{$('home-content').inert=true;$('home-levels').hidden=false;$('home-back').focus({preventScroll:true});};
   $('home-back').onclick=()=>{if(homeWorking)return;$('home-levels').hidden=true;$('home-content').inert=false;$('home-choose').focus({preventScroll:true});};
@@ -406,7 +414,9 @@ async function boot() {
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){
     if(!$('home').hidden){if(!$('home-levels').hidden&&!homeWorking){$('home-levels').hidden=true;$('home-content').inert=false;$('home-choose').focus({preventScroll:true});}return;}
     if(targetsOpen){setTargetsOpen(false);$('targets-toggle').focus({preventScroll:true});return;}
-    if(modal&&game.status==='playing')closeModal();else{selected=[];gestures?.cancel();drawLine();}
+    if(modal&&game.status==='playing'){
+      if($('restart-cancel'))showSettings();else closeModal();
+    }else{selected=[];gestures?.cancel();drawLine();}
   }});
   app.ticker.add(()=>{
     const now=performance.now()/1000;
