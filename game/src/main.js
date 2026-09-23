@@ -347,12 +347,13 @@ async function boot() {
     $('resume').onclick=closeModal;
   }
   function showRestartConfirmation(){
-    openModal(`<div class="big-icon">${icon('reset')}</div><h2 id="modal-title">重开第 ${levels[currentLevel].id} 关？</h2><p>本关当前进度会丢失，确定要重新开始吗？</p><button class="action primary" id="restart-confirm">确认重开</button><button class="action" id="restart-cancel">返回设置</button>`);
+    openModal(`<div class="big-icon">${icon('reset')}</div><h2 id="modal-title">重开第 ${levels[currentLevel].id} 关？</h2><p>本关当前进度会丢失，确定要重新开始吗？</p><button class="action" id="restart-confirm">确认重开</button><button class="action primary" id="restart-cancel">返回设置</button>`);
     $('restart-confirm').onclick=async()=>{
       const button=$('restart-confirm');button.disabled=true;button.textContent='正在重开…';
       if(!await loadLevel(currentLevel,false)&&button.isConnected){button.disabled=false;button.textContent='确认重开';}
     };
     $('restart-cancel').onclick=showSettings;
+    $('restart-cancel').focus({preventScroll:true});
   }
   function showHelp(){
     openModal(`<div class="big-icon">✧</div><h2 id="modal-title">连起来，归一类</h2><dl><dt>① 拖动连线</dt><dd>按住图块，经过同一分类的其他图块，松手即可合并。往回拖可以撤回连线。</dd><dt>② 凑齐一组</dt><dd>合并后的图块显示累计数量；收齐这个分类的所有图片，就会整组消除。</dd><dt>③ 留意补行</dt><dd>棋盘空出整行后，上方预览的候补牌会按顺序入场；每次最多补两排。混合不同分类会损失一步；没有思路时可用提示和洗牌。</dd><dt>④ 特殊图块</dt><dd>隐藏图块要连周围图块逐层揭开；钥匙随有效合并解开同编号的锁；金色 +5 图块点按即可增加步数。</dd></dl><button class="action primary" id="settings-back">返回设置</button><button class="modal-link" id="resume">继续游戏</button>`);
