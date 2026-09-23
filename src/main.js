@@ -31,6 +31,7 @@ async function boot() {
   const board = $('board');
   const app = new Application();
   await app.init({ width:448,height:420,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,preference:'webgl' });
+  app.ticker.maxFPS=60;
   board.appendChild(app.canvas); app.canvas.setAttribute('aria-label','拖动连接同类图片，松手合并');
   app.canvas.setAttribute('role','img');
   const pathsForLevel = level => [...new Set(level.groups.flatMap(g=>[g.symbol,...g.images]).filter(Boolean).map(assetUrl))];
@@ -42,7 +43,7 @@ async function boot() {
   const tweens=[]; const sounds={};
   for (const name of ['select','merge','wrong','complete','win']) { sounds[name]=new Audio(assetUrl(`/assets/${name}.wav`));sounds[name].volume=name==='select'?.16:.3; }
   function sound(name) { if(muted)return;const a=sounds[name].cloneNode();a.volume=sounds[name].volume;a.play().catch(()=>{}); }
-  function say(text,kind='',seconds=2.5){$('message').textContent=text;$('message').className='message '+kind;messageUntil=time+seconds;}
+  function say(text,kind='',seconds=2.5){const el=$('message'),className='message '+kind;if(el.textContent!==text)el.textContent=text;if(el.className!==className)el.className=className;messageUntil=seconds>0?time+seconds:0;}
   function tween(duration,step) { const token=epoch;return new Promise(resolve=>tweens.push({start:time,duration,step,resolve,token})); }
   function pos(t){return {x:left+t.x*(cell+gap)+cell/2,y:bottom-t.y*(cell+gap)-cell/2};}
   function layout(){
