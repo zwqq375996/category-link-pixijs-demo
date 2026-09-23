@@ -16,7 +16,8 @@ const icons = {
   hint:'<path d="M9 18h6m-5 3h4M8 13a6 6 0 1 1 8 0c-1 1-1 2-1 3H9c0-1 0-2-1-3Z"/>',
   shuffle:'<path d="M3 6h3c5 0 7 12 12 12h3m-4-4 4 4-4 4M3 18h3c2 0 3-2 4-4m4-4c1-2 2-4 4-4h3m-4-4 4 4-4 4"/>',
   reset:'<path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/>',
-  home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-7h6v7"/>'
+  home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-7h6v7"/>',
+  settings:'<path d="M12 3v2m0 14v2M4.2 4.2l1.4 1.4m12.8 12.8 1.4 1.4M3 12h2m14 0h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.4"/>'
 };
 const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`;
 const escape = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -40,8 +41,8 @@ async function boot() {
   try{const value=Number(localStorage.getItem(storageKey));if(Number.isInteger(value)&&value>=0&&value<levels.length)savedIndex=value;}catch{}
   const appRoot = document.querySelector('#app');
   appRoot.innerHTML = `<section class="game" aria-label="Link&amp;Sort 连线归类游戏">
-    <header class="top"><div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><div class="brand-copy"><div class="brand-title">Link<b>&amp;</b>Sort</div><div class="level-choice"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div></div></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="home-button" aria-label="返回首页" title="返回首页">${icon('home')}</button><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
-    <div class="targets-label"><span>收集所有分类</span><span id="progress">0 / 4</span></div><div class="targets" id="targets" aria-label="分类收集进度"></div>
+    <header class="top"><div class="level-choice"><span class="level-dot" aria-hidden="true"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="settings" aria-label="设置" title="设置">${icon('settings')}</button></div></header>
+    <div class="targets-section"><button class="targets-label targets-toggle" id="targets-toggle" type="button" aria-controls="targets-drawer" aria-expanded="false"><span>收集所有分类</span><span class="targets-toggle-end"><span id="progress">0 / 4</span><svg class="targets-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button><div class="targets-drawer" id="targets-drawer" aria-hidden="true" inert><div class="targets" id="targets" aria-label="分类收集进度"></div></div></div>
     <div class="upcoming"><span id="queue-label">待补入</span><div class="queue" id="queue"></div><span class="queue-count" id="queue-count"></span></div>
     <div class="board" id="board" aria-label="游戏棋盘"></div>
     <div class="message" id="message" role="status" aria-live="polite">拖动连接同类图块，松手合并</div>
@@ -52,6 +53,18 @@ async function boot() {
   const $ = id => document.getElementById(id);
   const gamePanels=[...document.querySelector('.game').children].filter(el=>el.id!=='home'&&el.id!=='overlay');
   gamePanels.forEach(el=>{el.inert=true;});
+  let targetsOpen=false;
+  function setTargetsOpen(open){
+    targetsOpen=open;
+    $('targets-toggle').setAttribute('aria-expanded',String(open));
+    $('targets-drawer').setAttribute('aria-hidden',String(!open));
+    $('targets-drawer').inert=!open;
+    $('targets-drawer').classList.toggle('open',open);
+  }
+  $('targets-toggle').onclick=()=>setTargetsOpen(!targetsOpen);
+  document.addEventListener('pointerdown',e=>{
+    if(targetsOpen&&e.target instanceof Element&&!e.target.closest('.targets-section'))setTargetsOpen(false);
+  });
   const board = $('board');
   const app = new Application();
   await app.init({ width:448,height:420,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,preference:'webgl',autoStart:false });
@@ -208,7 +221,7 @@ async function boot() {
     if('requestIdleCallback' in window)requestIdleCallback(start,{timeout:1500});else setTimeout(start,800);
   }
   async function loadLevel(index,showIntro=true){
-    const token=++epoch;selected=[];clearHint();gestures?.cancel();busy=true;
+    const token=++epoch;selected=[];clearHint();setTargetsOpen(false);gestures?.cancel();busy=true;
     say(`第 ${levels[index].id} 关加载中…`,'',20);
     try { await ensureLevelReady(index); }
     catch(error){if(token===epoch){busy=false;say(`关卡素材加载失败：${error.message}`,'bad',20);}return false;}
@@ -307,8 +320,25 @@ async function boot() {
     }));
   }
   function burst(p){for(let i=0;i<20;i++){const g=new Graphics().roundRect(-3,-5,6,10,2).fill([0xb599e4,0x76ccbf,0xf1c978,0xed9dba][i%4]);g.position.set(p.x,p.y);effects.addChild(g);const angle=Math.random()*Math.PI*2,speed=40+Math.random()*110;tween(.65,q=>{g.x=p.x+Math.cos(angle)*speed*q;g.y=p.y+Math.sin(angle)*speed*q+80*q*q;g.rotation=q*8;g.alpha=1-q;}).then(()=>{if(!g.destroyed)g.destroy();});}}
-  function openModal(html){modal=true;gestures?.cancel();selected=[];drawLine();$('overlay').hidden=false;$('modal').innerHTML=html;$('modal').focus();}
+  function openModal(html){modal=true;setTargetsOpen(false);gestures?.cancel();selected=[];drawLine();$('overlay').hidden=false;$('modal').innerHTML=html;$('modal').focus();}
   function closeModal(){modal=false;$('overlay').hidden=true;}
+  function showSettings(){
+    if(busy)return;
+    openModal(`<div class="settings-heading-icon">${icon('settings')}</div><h2 id="modal-title">设置</h2><div class="settings-options"><button class="settings-option" id="settings-home">${icon('home')}<span>返回主页</span><span class="settings-value">›</span></button><button class="settings-option" id="settings-sound" aria-pressed="${!muted}">${icon('sound')}<span>音效</span><strong class="settings-value">${muted?'已关闭':'已开启'}</strong></button><button class="settings-option" id="settings-help">${icon('help')}<span>玩法说明</span><span class="settings-value">›</span></button></div><button class="action primary" id="resume">继续游戏</button>`);
+    $('settings-home').onclick=showHome;
+    $('settings-sound').onclick=()=>{
+      muted=!muted;
+      $('settings-sound').setAttribute('aria-pressed',String(!muted));
+      $('settings-sound').querySelector('.settings-value').textContent=muted?'已关闭':'已开启';
+    };
+    $('settings-help').onclick=showHelp;
+    $('resume').onclick=closeModal;
+  }
+  function showHelp(){
+    openModal(`<div class="big-icon">✧</div><h2 id="modal-title">连起来，归一类</h2><dl><dt>① 拖动连线</dt><dd>按住图块，经过同一分类的其他图块，松手即可合并。往回拖可以撤回连线。</dd><dt>② 凑齐一组</dt><dd>合并后的图块显示累计数量；收齐这个分类的所有图片，就会整组消除。</dd><dt>③ 留意补行</dt><dd>棋盘空出整行后，上方预览的候补牌会按顺序入场；每次最多补两排。混合不同分类会损失一步；没有思路时可用提示和洗牌。</dd><dt>④ 特殊图块</dt><dd>隐藏图块要连周围图块逐层揭开；钥匙随有效合并解开同编号的锁；金色 +5 图块点按即可在试玩版领取步数。</dd></dl><button class="action primary" id="settings-back">返回设置</button><button class="modal-link" id="resume">继续游戏</button>`);
+    $('settings-back').onclick=showSettings;
+    $('resume').onclick=closeModal;
+  }
   function updateHome(){
     const next=game?.status==='won'?(currentLevel+1)%levels.length:currentLevel;
     let title='开始游戏',note='从第 1 关开始';
@@ -321,7 +351,7 @@ async function boot() {
   }
   function showHome(){
     if(busy||!game)return;
-    closeModal();selected=[];clearHint();drawLine();
+    closeModal();setTargetsOpen(false);selected=[];clearHint();drawLine();
     $('home-levels').hidden=true;$('home-content').inert=false;$('home').hidden=false;
     gamePanels.forEach(el=>{el.inert=true;});
     updateHome();$('home-start').focus({preventScroll:true});
@@ -331,7 +361,7 @@ async function boot() {
     gamePanels.forEach(el=>{el.inert=false;});
     hasEntered=true;
     if(showIntro)showMechanicIntro(currentLevel);
-    else $('home-button').focus({preventScroll:true});
+    else $('settings').focus({preventScroll:true});
   }
   function showMechanicIntro(index){
     const guides=firstMechanicByLevel.get(index);if(!guides?.length)return;
@@ -368,16 +398,15 @@ async function boot() {
   }
   $('level').onchange=e=>loadLevel(Number(e.target.value));
   $('reset').onclick=()=>{if(busy)return;loadLevel(currentLevel,false);};
-  $('home-button').onclick=showHome;
+  $('settings').onclick=showSettings;
   $('home-choose').onclick=()=>{$('home-content').inert=true;$('home-levels').hidden=false;$('home-back').focus({preventScroll:true});};
   $('home-back').onclick=()=>{if(homeWorking)return;$('home-levels').hidden=true;$('home-content').inert=false;$('home-choose').focus({preventScroll:true});};
   $('home-levels').onclick=e=>{const button=e.target instanceof Element?e.target.closest('[data-home-level]'):null;if(button)openHomeLevel(Number(button.dataset.homeLevel));};
   $('hint').onclick=()=>{if(busy||modal)return;clearHint();hint=game.hint();hintTimer=setTimeout(()=>{clearHint();drawLine();},3500);drawLine();say(hint.length?'沿着金色连线拖动试试':'当前没有可连的同类，试试洗牌',hint.length?'good':'');};
   $('shuffle').onclick=async()=>{if(busy||modal)return;busy=true;selected=[];clearHint();game.shuffle();say('图块换了位置，继续找同类吧');sound('merge');await sync(true);busy=false;layout();updateButtons();};
-  $('sound').onclick=()=>{muted=!muted;$('sound').classList.toggle('sound-off',muted);$('sound').setAttribute('aria-label',muted?'打开声音':'关闭声音');$('sound').setAttribute('aria-pressed',String(!muted));};
-  $('help').onclick=()=>{if(busy)return;openModal(`<div class="big-icon">✧</div><h2 id="modal-title">连起来，归一类</h2><dl><dt>① 拖动连线</dt><dd>按住图块，经过同一分类的其他图块，松手即可合并。往回拖可以撤回连线。</dd><dt>② 凑齐一组</dt><dd>合并后的图块显示累计数量；收齐这个分类的所有图片，就会整组消除。</dd><dt>③ 留意补行</dt><dd>棋盘空出整行后，上方预览的候补牌会按顺序入场；每次最多补两排。混合不同分类会损失一步；没有思路时可用提示和洗牌。</dd><dt>④ 特殊图块</dt><dd>隐藏图块要连周围图块逐层揭开；钥匙随有效合并解开同编号的锁；金色 +5 图块点按即可在试玩版领取步数。</dd></dl><button class="action primary" id="resume">继续游戏</button>`);$('resume').onclick=closeModal;};
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){
     if(!$('home').hidden){if(!$('home-levels').hidden&&!homeWorking){$('home-levels').hidden=true;$('home-content').inert=false;$('home-choose').focus({preventScroll:true});}return;}
+    if(targetsOpen){setTargetsOpen(false);$('targets-toggle').focus({preventScroll:true});return;}
     if(modal&&game.status==='playing')closeModal();else{selected=[];gestures?.cancel();drawLine();}
   }});
   app.ticker.add(()=>{
