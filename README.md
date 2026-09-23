@@ -13,4 +13,4 @@ npm run dev
 
 ## Publish
 
-Pushes to `main` run the tests, build the site, and deploy it to GitHub Pages.
+Pushes to `main` run the tests, build the site, and deploy it to [Link&Sort](https://zwqq375996.github.io/link-and-sort/).
