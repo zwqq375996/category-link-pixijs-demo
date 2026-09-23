@@ -2,15 +2,18 @@ import { Application, Assets, Container, Graphics, Sprite, Text } from 'pixi.js'
 import 'pixi.js/prepare';
 import { Game } from './model.js';
 import { bindPointer } from './pointer.js';
+import { homeMarkup } from './home.js';
 import './style.css';
 import './theme.css';
+import './home.css';
 
 const icons = {
   sound:'<path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
   help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4m0 3h.01"/>',
   hint:'<path d="M9 18h6m-5 3h4M8 13a6 6 0 1 1 8 0c-1 1-1 2-1 3H9c0-1 0-2-1-3Z"/>',
   shuffle:'<path d="M3 6h3c5 0 7 12 12 12h3m-4-4 4 4-4 4M3 18h3c2 0 3-2 4-4m4-4c1-2 2-4 4-4h3m-4-4 4 4-4 4"/>',
-  reset:'<path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/>'
+  reset:'<path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/>',
+  home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z"/><path d="M9 21v-7h6v7"/>'
 };
 const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`;
 const escape = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -29,17 +32,23 @@ async function boot() {
     const index=levels.findIndex(level=>[...level.tiles,...level.pending.flat()].some(mechanic.appears));
     if(index>=0)firstMechanicByLevel.set(index,[...(firstMechanicByLevel.get(index)||[]),mechanic]);
   }
+  const storageKey='link-sort-last-level-v1';
+  let savedIndex=0;
+  try{const value=Number(localStorage.getItem(storageKey));if(Number.isInteger(value)&&value>=0&&value<levels.length)savedIndex=value;}catch{}
   const appRoot = document.querySelector('#app');
   appRoot.innerHTML = `<section class="game" aria-label="Link&amp;Sort 连线归类游戏">
-    <header class="top"><div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><div class="brand-copy"><div class="brand-title">Link<b>&amp;</b>Sort</div><div class="level-choice"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div></div></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
+    <header class="top"><div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><div class="brand-copy"><div class="brand-title">Link<b>&amp;</b>Sort</div><div class="level-choice"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div></div></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="home-button" aria-label="返回首页" title="返回首页">${icon('home')}</button><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
     <div class="targets-label"><span>收集所有分类</span><span id="progress">0 / 4</span></div><div class="targets" id="targets" aria-label="分类收集进度"></div>
     <div class="upcoming"><span id="queue-label">待补入</span><div class="queue" id="queue"></div><span class="queue-count" id="queue-count"></span></div>
     <div class="board" id="board" aria-label="游戏棋盘"></div>
     <div class="message" id="message" role="status" aria-live="polite">拖动连接同类图块，松手合并</div>
     <div class="actions"><button class="action primary" id="hint">${icon('hint')}提示</button><button class="action" id="shuffle">${icon('shuffle')}洗牌</button><button class="action" id="reset">${icon('reset')}重开</button></div>
     <div class="overlay" id="overlay" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" id="modal"></section></div>
+    ${homeMarkup(levels,firstMechanicByLevel,assetUrl,escape)}
   </section>`;
   const $ = id => document.getElementById(id);
+  const gamePanels=[...document.querySelector('.game').children].filter(el=>el.id!=='home'&&el.id!=='overlay');
+  gamePanels.forEach(el=>{el.inert=true;});
   const board = $('board');
   const app = new Application();
   await app.init({ width:448,height:420,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,preference:'webgl' });
@@ -66,7 +75,7 @@ async function boot() {
   await Assets.load(pathsForLevel(levels[0]));
   const bg = new Graphics(), tileLayer = new Container(), lines = new Graphics(), effects = new Container();
   app.stage.addChild(bg,tileLayer,lines,effects);
-  let game, currentLevel=0, selected=[], hint=[], hintUntil=0, gestures=null, busy=false, muted=false, modal=false, epoch=0;
+  let game, currentLevel=savedIndex, selected=[], hint=[], hintUntil=0, gestures=null, busy=false, muted=false, modal=false, epoch=0, hasEntered=false, homeWorking=false;
   let W=448,H=420,cell=100,gap=9,left=0,bottom=0,views=new Map(),time=0,messageUntil=0,previousStatus='playing',laidOutGame=null,renderedTargetLevel=null,renderedTargetCards=[],renderedCompletionKey=null,renderedQueueRow;
   const tweens=[]; const sounds={};
   for (const name of ['select','merge','wrong','complete','win']) { sounds[name]=new Audio(assetUrl(`/assets/${name}.wav`));sounds[name].volume=name==='select'?.16:.3; }
@@ -182,6 +191,8 @@ async function boot() {
     currentLevel=index;busy=false;previousStatus='playing';
     game=new Game(levels[index]);for(const v of views.values())v.root.destroy({children:true});views.clear();effects.removeChildren().forEach(c=>c.destroy());
     $('level').value=String(index);closeModal();layout();sync();$('targets').scrollLeft=0;say('拖动连接同类图块，松手合并','',5);
+    try{localStorage.setItem(storageKey,String(index));}catch{}
+    updateHome();
     if(showIntro)showMechanicIntro(index);
     prefetchNextLevel(index,token);return true;
   }
@@ -272,26 +283,101 @@ async function boot() {
   function burst(p){for(let i=0;i<20;i++){const g=new Graphics().roundRect(-3,-5,6,10,2).fill([0xb599e4,0x76ccbf,0xf1c978,0xed9dba][i%4]);g.position.set(p.x,p.y);effects.addChild(g);const angle=Math.random()*Math.PI*2,speed=40+Math.random()*110;tween(.65,q=>{g.x=p.x+Math.cos(angle)*speed*q;g.y=p.y+Math.sin(angle)*speed*q+80*q*q;g.rotation=q*8;g.alpha=1-q;}).then(()=>{if(!g.destroyed)g.destroy();});}}
   function openModal(html){modal=true;gestures?.cancel();selected=[];drawLine();$('overlay').hidden=false;$('modal').innerHTML=html;$('modal').focus();}
   function closeModal(){modal=false;$('overlay').hidden=true;}
+  function updateHome(){
+    const next=game?.status==='won'?(currentLevel+1)%levels.length:currentLevel;
+    let title='开始游戏',note='从第 1 关开始';
+    if(game?.status==='won'){title=next?'前往下一关':'回到第一关';note=`第 ${levels[next].id} 关等着你`;}
+    else if(game?.status==='lost'){title='再试一次';note=`重新挑战第 ${levels[currentLevel].id} 关`;}
+    else if(hasEntered){title='继续游戏';note=`第 ${levels[currentLevel].id} 关进行中`;}
+    else if(currentLevel>0){title=`继续第 ${levels[currentLevel].id} 关`;note='从本关重新开始';}
+    $('home-start-title').textContent=title;$('home-start-note').textContent=note;
+    for(const button of $('home-levels').querySelectorAll('[data-home-level]'))button.classList.toggle('current',Number(button.dataset.homeLevel)===next);
+  }
+  function showHome(){
+    if(busy||!game)return;
+    closeModal();selected=[];hint=[];drawLine();
+    $('home-levels').hidden=true;$('home-content').inert=false;$('home').hidden=false;
+    gamePanels.forEach(el=>{el.inert=true;});
+    updateHome();$('home-start').focus({preventScroll:true});
+  }
+  function enterGame(showIntro=false){
+    $('home').hidden=true;$('home-levels').hidden=true;$('home-content').inert=false;
+    gamePanels.forEach(el=>{el.inert=false;});
+    hasEntered=true;
+    if(showIntro)showMechanicIntro(currentLevel);
+    else $('home-button').focus({preventScroll:true});
+  }
   function showMechanicIntro(index){
     const guides=firstMechanicByLevel.get(index);if(!guides?.length)return;
     const content=guides.map(guide=>`<div class="big-icon">${guide.icon}</div><h3>${guide.title}</h3><p>${guide.description}</p>`).join('');
     openModal(`<div class="mechanic-tag">第 ${levels[index].id} 关 · 新机制</div><h2 id="modal-title">新规则登场</h2>${content}<button class="action primary" id="resume">开始挑战</button>`);
     $('resume').onclick=closeModal;
   }
-  function checkStatus(){if(game.status===previousStatus||busy)return;previousStatus=game.status;if(game.status==='won'){sound('win');openModal(`<div class="celebrate">★ ★ ★</div><h2 id="modal-title">全部归类！</h2><p>完成 ${game.level.groups.length} 个分类，使用 ${game.turn} 步。<br>${currentLevel<levels.length-1?'下一关有更多有趣的小东西等着你。':'三十个试玩关卡全部探索完毕。'}</p><button class="action primary" id="next">${currentLevel<levels.length-1?'下一关':'回到第一关'}</button><button class="action" id="again">再玩一次</button>`);const next=(currentLevel+1)%levels.length;ensureLevelReady(next).catch(()=>{});$('next').onclick=async()=>{const button=$('next');button.disabled=true;button.textContent='正在进入…';if(!await loadLevel(next)&&button.isConnected){button.disabled=false;button.textContent='重试下一关';}};$('again').onclick=()=>loadLevel(currentLevel,false);}
-    else if(game.status==='lost'){openModal(`<div class="big-icon">↻</div><h2 id="modal-title">再试一次</h2><p>步数用完了，还差 ${game.level.groups.length-game.complete.size} 个分类。<br>试着把同类图块一次连得更长。</p><button class="action primary" id="again">重新开始</button>`);$('again').onclick=()=>loadLevel(currentLevel,false);}}
+  function checkStatus(){
+    if(game.status===previousStatus||busy)return;
+    previousStatus=game.status;updateHome();
+    if(game.status==='won'){
+      sound('win');
+      openModal(`<div class="celebrate">★ ★ ★</div><h2 id="modal-title">全部归类！</h2><p>完成 ${game.level.groups.length} 个分类，使用 ${game.turn} 步。<br>${currentLevel<levels.length-1?'下一关有更多有趣的小东西等着你。':'三十个试玩关卡全部探索完毕。'}</p><button class="action primary" id="next">${currentLevel<levels.length-1?'下一关':'回到第一关'}</button><button class="action" id="again">再玩一次</button><button class="modal-link" id="to-home">返回首页</button>`);
+      const next=(currentLevel+1)%levels.length;ensureLevelReady(next).catch(()=>{});
+      $('next').onclick=async()=>{const button=$('next');button.disabled=true;button.textContent='正在进入…';if(!await loadLevel(next)&&button.isConnected){button.disabled=false;button.textContent='重试下一关';}};
+      $('again').onclick=()=>loadLevel(currentLevel,false);
+    }else if(game.status==='lost'){
+      openModal(`<div class="big-icon">↻</div><h2 id="modal-title">再试一次</h2><p>步数用完了，还差 ${game.level.groups.length-game.complete.size} 个分类。<br>试着把同类图块一次连得更长。</p><button class="action primary" id="again">重新开始</button><button class="modal-link" id="to-home">返回首页</button>`);
+      $('again').onclick=()=>loadLevel(currentLevel,false);
+    }
+    if($('to-home'))$('to-home').onclick=showHome;
+  }
+  async function openHomeLevel(index){
+    if(homeWorking)return;
+    homeWorking=true;
+    $('home-levels-intro').textContent=`第 ${levels[index].id} 关加载中…`;
+    try{
+      if(await loadLevel(index,false)){
+        enterGame(true);
+        $('home-levels-intro').textContent='想玩哪一关？所有关卡都可以直接进入。';
+      }else $('home-levels-intro').textContent='关卡暂时没有加载成功，请再试一次。';
+    }catch(error){$('home-levels-intro').textContent=`关卡加载失败：${error.message}`;}
+    finally{homeWorking=false;}
+  }
   $('level').onchange=e=>loadLevel(Number(e.target.value));
   $('reset').onclick=()=>{if(busy)return;loadLevel(currentLevel,false);};
+  $('home-button').onclick=showHome;
+  $('home-choose').onclick=()=>{$('home-content').inert=true;$('home-levels').hidden=false;$('home-back').focus({preventScroll:true});};
+  $('home-back').onclick=()=>{if(homeWorking)return;$('home-levels').hidden=true;$('home-content').inert=false;$('home-choose').focus({preventScroll:true});};
+  $('home-levels').onclick=e=>{const button=e.target instanceof Element?e.target.closest('[data-home-level]'):null;if(button)openHomeLevel(Number(button.dataset.homeLevel));};
   $('hint').onclick=()=>{if(busy||modal)return;hint=game.hint();hintUntil=time+3.5;drawLine();say(hint.length?'沿着金色连线拖动试试':'当前没有可连的同类，试试洗牌',hint.length?'good':'');};
   $('shuffle').onclick=async()=>{if(busy||modal)return;busy=true;selected=[];hint=[];game.shuffle();say('图块换了位置，继续找同类吧');sound('merge');await sync(true);busy=false;layout();updateButtons();};
   $('sound').onclick=()=>{muted=!muted;$('sound').classList.toggle('sound-off',muted);$('sound').setAttribute('aria-label',muted?'打开声音':'关闭声音');$('sound').setAttribute('aria-pressed',String(!muted));};
   $('help').onclick=()=>{if(busy)return;openModal(`<div class="big-icon">✧</div><h2 id="modal-title">连起来，归一类</h2><dl><dt>① 拖动连线</dt><dd>按住图块，经过同一分类的其他图块，松手即可合并。往回拖可以撤回连线。</dd><dt>② 凑齐一组</dt><dd>合并后的图块显示累计数量；收齐这个分类的所有图片，就会整组消除。</dd><dt>③ 留意补行</dt><dd>棋盘空出整行后，上方预览的候补牌会按顺序入场；每次最多补两排。混合不同分类会损失一步；没有思路时可用提示和洗牌。</dd><dt>④ 特殊图块</dt><dd>隐藏图块要连周围图块逐层揭开；钥匙随有效合并解开同编号的锁；金色 +5 图块点按即可在试玩版领取步数。</dd></dl><button class="action primary" id="resume">继续游戏</button>`);$('resume').onclick=closeModal;};
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(modal&&game.status==='playing')closeModal();else{selected=[];gestures?.cancel();drawLine();}}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){
+    if(!$('home').hidden){if(!$('home-levels').hidden&&!homeWorking){$('home-levels').hidden=true;$('home-content').inert=false;$('home-choose').focus({preventScroll:true});}return;}
+    if(modal&&game.status==='playing')closeModal();else{selected=[];gestures?.cancel();drawLine();}
+  }});
   app.ticker.add(ticker=>{const dt=Math.min(ticker.deltaMS/1000,.08);time+=dt;
     for(let i=tweens.length-1;i>=0;i--){const t=tweens[i];if(t.token!==epoch){tweens.splice(i,1);t.resolve();continue;}const p=Math.min(1,(time-t.start)/t.duration);t.step(p);if(p>=1){tweens.splice(i,1);t.resolve();}}
     if(game){if(hint.length&&time>=hintUntil){hint=[];drawLine();}if(messageUntil&&time>messageUntil&&!selected.length){messageUntil=0;say('拖动连接同类图块，松手合并','',0);}}});
   new ResizeObserver(()=>{if(!busy)layout();}).observe(board);
-  loadLevel(0);
+  const initialLevelLoad=loadLevel(savedIndex,false);
+  $('home-start').onclick=async()=>{
+    if(homeWorking)return;
+    homeWorking=true;$('home-start').disabled=true;$('home-status').textContent='正在准备关卡…';
+    try{
+      if(!game)await initialLevelLoad;
+      if(!game)throw Error('关卡暂时没有加载成功，请再试一次。');
+      let intro=!hasEntered;
+      if(game.status==='won'){
+        const next=(currentLevel+1)%levels.length;
+        if(!await loadLevel(next,false))throw Error('下一关暂时没有加载成功，请再试一次。');
+        intro=true;
+      }else if(game.status==='lost'){
+        if(!await loadLevel(currentLevel,false))throw Error('关卡暂时没有加载成功，请再试一次。');
+        intro=false;
+      }
+      enterGame(intro);$('home-status').textContent='';
+    }catch(error){$('home-status').textContent=error.message;}
+    finally{homeWorking=false;$('home-start').disabled=false;}
+  };
   // Read-only test visibility; actions still flow through DOM pointer handlers.
   if(import.meta.env.DEV)window.__demo={snapshot:()=>game.snapshot(),hint:()=>game.hint(),coords:id=>{const t=game.tile(id);if(!t)return null;const p=pos(t),r=app.canvas.getBoundingClientRect();return{x:r.left+p.x*r.width/W,y:r.top+p.y*r.height/H};},isBusy:()=>busy};
 }
