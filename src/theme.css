@@ -77,37 +77,38 @@ body{
 .icon-btn svg{width:19px;height:19px;stroke-width:2}
 button.sound-off{background:#eee9e7;color:#aaa0ad}
 
-.targets-label{margin:12px 2px 6px;color:#766788;font-size:11px;font-weight:800;letter-spacing:.3px}
-.targets-label span:first-child::before{content:'✦';color:#d9a255;margin-right:6px}
+.targets-label{margin:8px 2px 4px;color:#766788;font-size:10px;font-weight:800;letter-spacing:.2px}
+.targets-label span:first-child::before{content:'✦';color:#d9a255;margin-right:5px}
 #progress{
   color:#765ba6;
   background:#eae0f2;
   border:1px solid #dbcbe9;
   border-radius:99px;
-  min-width:48px;
-  padding:2px 7px;
+  min-width:42px;
+  padding:1px 6px;
   text-align:center;
   font-variant-numeric:tabular-nums;
 }
-.targets{min-height:71px;gap:7px;padding:2px 1px 5px;scrollbar-color:#d4c3df transparent}
+.targets{min-height:55px;gap:5px;padding:1px 1px 4px;scrollbar-color:#d4c3df transparent}
 .target{
   position:relative;
-  flex:0 0 101px;
-  min-width:101px;
-  height:63px;
+  flex:0 0 84px;
+  min-width:84px;
+  height:49px;
   border:1px solid #e6d9ca;
   border-bottom-color:#d4c1bb;
-  border-radius:14px;
-  padding:5px 7px;
+  border-radius:12px;
+  padding:4px 5px;
+  gap:4px;
   background:linear-gradient(150deg,#fffefa,#fff8ec);
   box-shadow:0 3px 0 #e2d5df,0 5px 8px #483c6b0e;
   transition:background .2s,border-color .2s,transform .2s;
 }
-.target::after{content:'';position:absolute;right:6px;top:5px;width:4px;height:4px;border-radius:50%;background:#e7b96d;opacity:.7}
-.target img{width:30px;height:35px;filter:drop-shadow(0 2px 1px #6c4d4829)}
-.target .name{font-size:10px;font-weight:750;color:#473c5d;max-width:60px}
-.target .number{color:#8f7e9b;font-size:10px;margin-top:3px}
-.target .dot{background:#eae2e8;height:4px;width:19px}
+.target::after{content:'';position:absolute;right:5px;top:4px;width:3px;height:3px;border-radius:50%;background:#e7b96d;opacity:.7}
+.target img{width:24px;height:27px;flex:none;filter:drop-shadow(0 2px 1px #6c4d4829)}
+.target .name{font-size:9px;line-height:1.15;font-weight:750;color:#473c5d;max-width:48px}
+.target .number{color:#8f7e9b;font-size:8.5px;margin-top:2px;gap:3px}
+.target .dot{background:#eae2e8;height:3px;width:13px}
 .target .dot i{background:linear-gradient(90deg,#eab869,#9473c7)}
 .target.done{
   background:linear-gradient(145deg,#f4fff3,#e0f4e7);
@@ -115,7 +116,7 @@ button.sound-off{background:#eee9e7;color:#aaa0ad}
   box-shadow:0 3px 0 #a6d4bd,0 5px 8px #3c8f7320;
   animation:collect-card .42s ease-out;
 }
-.target.done::after{content:'✓';width:auto;height:auto;right:5px;top:4px;background:none;color:#3d9f7b;font-size:13px;font-weight:900;opacity:1}
+.target.done::after{content:'✓';width:auto;height:auto;right:4px;top:3px;background:none;color:#3d9f7b;font-size:11px;font-weight:900;opacity:1}
 .target.done .number{color:#419c7b}
 @keyframes collect-card{0%{transform:scale(.9) rotate(-3deg)}60%{transform:scale(1.05) rotate(1deg)}100%{transform:scale(1)}}
 
@@ -211,11 +212,9 @@ button.sound-off{background:#eee9e7;color:#aaa0ad}
 @media(max-width:520px){
   .game{box-shadow:none;border:0;background:linear-gradient(#fffaf2,#f6f0ed 60%,#f1edf4)}
   .game::before{height:4px}
-  .targets{min-height:69px}
-  .target{flex-basis:97px;min-width:97px;height:61px}
-  .target img{width:27px;height:33px}
-  .target .name{font-size:10px}
-  .target .dot{width:16px}
+  .targets{min-height:55px}
+  .target{flex-basis:82px;min-width:82px;height:49px}
+  .target img{width:23px;height:27px}
   .board{box-shadow:inset 0 0 0 4px #b8a4d01f,inset 0 10px 28px #221c3b5c,0 4px 0 #cbbdd4}
 }
 @media(max-width:360px){
@@ -225,15 +224,15 @@ button.sound-off{background:#eee9e7;color:#aaa0ad}
   .moves-status{min-width:59px;height:43px}
   .tools-top{gap:4px}
   .icon-btn{width:33px;height:35px}
-  .target{flex-basis:94px;min-width:94px}
+  .target{flex-basis:77px;min-width:77px}
 }
 @media(max-width:340px){.brand-mark{display:none}}
 @media(max-height:730px){
   .top{min-height:45px}
-  .targets-label{margin-top:8px;margin-bottom:4px}
-  .targets{min-height:62px}
-  .target{height:55px}
-  .target img{height:29px}
+  .targets-label{margin-top:6px;margin-bottom:3px}
+  .targets{min-height:50px}
+  .target{height:45px}
+  .target img{height:25px}
   .upcoming{min-height:34px}
   .message{height:27px}
   .actions .action{height:45px}
