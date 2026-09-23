@@ -125,8 +125,8 @@
 .modal-link:hover{color:#553d82;text-decoration:underline}
 
 @media(max-width:520px){
-  .home{padding:calc(18px + env(safe-area-inset-top)) 22px calc(12px + env(safe-area-inset-bottom))}
-  .home-levels{padding:calc(28px + env(safe-area-inset-top)) 19px calc(20px + env(safe-area-inset-bottom))}
+  .home{padding:18px 22px 12px}
+  .home-levels{padding:28px 19px 20px}
 }
 @media(max-width:360px){
   .tools-top .icon-btn{width:32px}
@@ -149,10 +149,6 @@
   .home-actions{gap:8px}
   .home-status{margin-top:5px}
   .home-footer{height:18px}
-}
-@media(max-width:520px){
-  .ios-device .home{padding-top:max(62px,calc(18px + env(safe-area-inset-top)))}
-  .ios-device .home-levels{padding-top:max(68px,calc(28px + env(safe-area-inset-top)))}
 }
 @media(prefers-reduced-motion:reduce){
   .home-start,.home-choose,.home-level-button{transition:none}
