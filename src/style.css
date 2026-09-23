@@ -22,3 +22,13 @@
 .queue img{width:25px;height:25px;padding:2px}
 .queue-hidden,.queue-extra{width:25px;height:25px;font-size:13px}
 .queue-count{font-size:13px}
+
+@media(max-width:520px){
+  .game{min-height:0;height:100dvh;overflow-x:hidden;overflow-y:auto}
+  .board{min-height:180px}
+}
+@media(max-height:520px){
+  #app{min-height:100dvh;padding:0}
+  .game{height:100dvh;min-height:0;overflow-x:hidden;overflow-y:auto}
+  .board{min-height:180px}
+}
