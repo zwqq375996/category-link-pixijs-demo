@@ -3,6 +3,7 @@ import 'pixi.js/prepare';
 import { Game } from './model.js';
 import { bindPointer } from './pointer.js';
 import { homeMarkup } from './home.js';
+import { starTargets, starsForRemaining } from './ratings.js';
 import './style.css';
 import './theme.css';
 import './home.css';
@@ -34,8 +35,18 @@ async function boot() {
     if(index>=0)firstMechanicByLevel.set(index,[...(firstMechanicByLevel.get(index)||[]),mechanic]);
   }
   const storageKey='link-sort-last-level-v1';
+  const bestStarsKey='link-sort-best-stars-v1';
   let savedIndex=0;
   try{const value=Number(localStorage.getItem(storageKey));if(Number.isInteger(value)&&value>=0&&value<levels.length)savedIndex=value;}catch{}
+  const bestStars=new Map();
+  try{
+    const saved=JSON.parse(localStorage.getItem(bestStarsKey)||'{}');
+    for(const level of levels){
+      const value=saved?.[level.id];
+      if(Number.isInteger(value)&&value>=1&&value<=3)bestStars.set(level.id,value);
+    }
+  }catch{}
+  for(const level of levels)starTargets(level.id);
   const appRoot = document.querySelector('#app');
   appRoot.innerHTML = `<section class="game" aria-label="Link&amp;Sort 连线归类游戏">
     <header class="top"><div class="level-choice"><span class="level-dot" aria-hidden="true"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="settings" aria-label="设置" title="设置">${icon('settings')}</button></div></header>
@@ -323,7 +334,8 @@ async function boot() {
   function closeModal(){modal=false;$('overlay').hidden=true;}
   function showSettings(){
     if(busy)return;
-    openModal(`<div class="settings-heading-icon">${icon('settings')}</div><h2 id="modal-title">设置</h2><div class="settings-options"><button class="settings-option" id="settings-home">${icon('home')}<span>返回主页</span><span class="settings-value">›</span></button><button class="settings-option" id="settings-reset">${icon('reset')}<span>重开本关</span><span class="settings-value">›</span></button><button class="settings-option" id="settings-sound" aria-pressed="${!muted}">${icon('sound')}<span>音效</span><strong class="settings-value">${muted?'已关闭':'已开启'}</strong></button><button class="settings-option" id="settings-help">${icon('help')}<span>玩法说明</span><span class="settings-value">›</span></button></div><button class="action primary" id="resume">继续游戏</button>`);
+    const {two,three}=starTargets(levels[currentLevel].id);
+    openModal(`<div class="settings-heading-icon">${icon('settings')}</div><h2 id="modal-title">设置</h2><div class="settings-options"><button class="settings-option" id="settings-home">${icon('home')}<span>返回主页</span><span class="settings-value">›</span></button><button class="settings-option" id="settings-reset">${icon('reset')}<span>重开本关</span><span class="settings-value">›</span></button><button class="settings-option" id="settings-sound" aria-pressed="${!muted}">${icon('sound')}<span>音效</span><strong class="settings-value">${muted?'已关闭':'已开启'}</strong></button><button class="settings-option" id="settings-help">${icon('help')}<span>玩法说明</span><span class="settings-value">›</span></button></div><p class="star-targets">本关星级目标：剩余 ${two} 步得 2 星，${three} 步得 3 星</p><button class="action primary" id="resume">继续游戏</button>`);
     $('settings-home').onclick=showHome;
     $('settings-reset').onclick=showRestartConfirmation;
     $('settings-sound').onclick=()=>{
@@ -355,7 +367,12 @@ async function boot() {
     else if(hasEntered){title='继续游戏';note=`第 ${levels[currentLevel].id} 关进行中`;}
     else if(currentLevel>0){title=`继续第 ${levels[currentLevel].id} 关`;note='从本关重新开始';}
     $('home-start-title').textContent=title;$('home-start-note').textContent=note;
-    for(const button of $('home-levels').querySelectorAll('[data-home-level]'))button.classList.toggle('current',Number(button.dataset.homeLevel)===next);
+    for(const button of $('home-levels').querySelectorAll('[data-home-level]')){
+      const index=Number(button.dataset.homeLevel),levelId=levels[index].id,best=bestStars.get(levelId)||0;
+      button.classList.toggle('current',index===next);
+      button.querySelector('.home-level-stars').textContent=best?`${'★'.repeat(best)}${'☆'.repeat(3-best)}`:'';
+      button.setAttribute('aria-label',`进入第 ${levelId} 关${best?`，最高 ${best} 星`:'，暂无星级记录'}`);
+    }
   }
   function showHome(){
     if(busy||!game)return;
@@ -379,14 +396,23 @@ async function boot() {
   }
   function checkStatus(){
     if(game.status===previousStatus||busy)return;
-    previousStatus=game.status;updateHome();
+    previousStatus=game.status;
     if(game.status==='won'){
+      const earned=starsForRemaining(game.level.id,game.moves);
+      if(earned>(bestStars.get(game.level.id)||0)){
+        bestStars.set(game.level.id,earned);
+        try{localStorage.setItem(bestStarsKey,JSON.stringify(Object.fromEntries(bestStars)));}catch{}
+      }
+      updateHome();
       sound('win');
-      openModal(`<div class="celebrate">★ ★ ★</div><h2 id="modal-title">全部归类！</h2><p>完成 ${game.level.groups.length} 个分类，使用 ${game.turn} 步。<br>${currentLevel<levels.length-1?'下一关有更多有趣的小东西等着你。':'全部关卡探索完毕。'}</p><button class="action primary" id="next">${currentLevel<levels.length-1?'下一关':'回到第一关'}</button><button class="action" id="again">再玩一次</button><button class="modal-link" id="to-home">返回首页</button>`);
+      const nextTarget=earned===1?starTargets(game.level.id).two:starTargets(game.level.id).three;
+      const starTip=earned===3?'已达成本关最高星级':`再多留 ${nextTarget-game.moves} 步可得 ${earned+1} 星`;
+      openModal(`<div class="celebrate" role="img" aria-label="获得 ${earned} 星">${Array.from({length:3},(_,i)=>i<earned?'★':'☆').join(' ')}</div><h2 id="modal-title">全部归类！</h2><p>完成 ${game.level.groups.length} 个分类，使用 ${game.turn} 步。<br>剩余 ${game.moves} 步 · ${starTip}<br>${currentLevel<levels.length-1?'下一关有更多有趣的小东西等着你。':'全部关卡探索完毕。'}</p><button class="action primary" id="next">${currentLevel<levels.length-1?'下一关':'回到第一关'}</button><button class="action" id="again">再玩一次</button><button class="modal-link" id="to-home">返回首页</button>`);
       const next=(currentLevel+1)%levels.length;ensureLevelReady(next).catch(()=>{});
       $('next').onclick=async()=>{const button=$('next');button.disabled=true;button.textContent='正在进入…';if(!await loadLevel(next)&&button.isConnected){button.disabled=false;button.textContent='重试下一关';}};
       $('again').onclick=()=>loadLevel(currentLevel,false);
     }else if(game.status==='lost'){
+      updateHome();
       openModal(`<div class="big-icon">↻</div><h2 id="modal-title">再试一次</h2><p>步数用完了，还差 ${game.level.groups.length-game.complete.size} 个分类。<br>试着把同类图块一次连得更长。</p><button class="action primary" id="again">重新开始</button><button class="modal-link" id="to-home">返回首页</button>`);
       $('again').onclick=()=>loadLevel(currentLevel,false);
     }
@@ -399,7 +425,7 @@ async function boot() {
     try{
       if(await loadLevel(index,false)){
         enterGame(true);
-        $('home-levels-intro').textContent='想玩哪一关？所有关卡都可以直接进入。';
+        $('home-levels-intro').textContent='所有关卡都可直接进入；通关后会记录最高星级。';
       }else $('home-levels-intro').textContent='关卡暂时没有加载成功，请再试一次。';
     }catch(error){$('home-levels-intro').textContent=`关卡加载失败：${error.message}`;}
     finally{homeWorking=false;}

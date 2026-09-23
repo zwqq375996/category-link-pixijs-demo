@@ -3,7 +3,7 @@ export function homeMarkup(levels, firstMechanicByLevel, assetUrl, escape) {
     `<div class="home-card home-card-${index+1}"><img src="${escape(assetUrl(group.symbol))}" alt=""></div>`
   ).join('');
   const levelButtons=levels.map((level,index)=>
-    `<button type="button" class="home-level-button${firstMechanicByLevel.has(index)?' new-mechanic':''}" data-home-level="${index}" aria-label="进入第 ${escape(level.id)} 关"><span>${escape(level.id)}</span></button>`
+    `<button type="button" class="home-level-button${firstMechanicByLevel.has(index)?' new-mechanic':''}" data-home-level="${index}" aria-label="进入第 ${escape(level.id)} 关"><span>${escape(level.id)}</span><span class="home-level-stars" aria-hidden="true"></span></button>`
   ).join('');
   return `<section class="home" id="home" aria-label="Link&Sort 游戏首页">
     <div class="home-topline"><span class="home-topline-mark">✦</span><span>LINK &amp; SORT</span><span class="home-topline-number">VOL. 01</span></div>
@@ -25,7 +25,7 @@ export function homeMarkup(levels, firstMechanicByLevel, assetUrl, escape) {
     <div class="home-footer"><span>✧</span> ${levels.length} 个关卡 · 随时开玩 <span>✧</span></div>
     <section class="home-levels" id="home-levels" aria-label="选择关卡" hidden>
       <div class="home-levels-header"><button type="button" class="home-back" id="home-back" aria-label="返回游戏首页">‹</button><div><p>YOUR COLLECTION</p><h2>选择关卡</h2></div></div>
-      <p class="home-levels-intro" id="home-levels-intro">想玩哪一关？所有关卡都可以直接进入。</p>
+      <p class="home-levels-intro" id="home-levels-intro">所有关卡都可直接进入；通关后会记录最高星级。</p>
       <div class="home-level-grid">${levelButtons}</div>
       <div class="home-levels-footer"><span class="home-levels-dot"></span> 金色标记表示新机制首次出现</div>
     </section>

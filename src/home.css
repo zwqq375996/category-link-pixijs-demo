@@ -113,7 +113,8 @@
 .home-levels-header h2{font-family:Baloo,Arial,sans-serif;font-size:26px;line-height:1.1;margin:0}
 .home-levels-intro{margin:13px 1px 15px;font-size:12px;color:#897892;flex:none}
 .home-level-grid{min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-content:start;gap:10px;padding:3px 2px 8px;scrollbar-color:#cdbadd transparent}
-.home-level-button{position:relative;aspect-ratio:1;min-height:50px;border:1px solid #ded0c7;border-radius:14px;color:#624e82;background:linear-gradient(#fffefa,#fff4e5);box-shadow:0 3px 0 #d5c5d0;font-family:Baloo,Arial,sans-serif;font-size:22px}
+.home-level-button{position:relative;aspect-ratio:1;min-height:50px;border:1px solid #ded0c7;border-radius:14px;color:#624e82;background:linear-gradient(#fffefa,#fff4e5);box-shadow:0 3px 0 #d5c5d0;font-family:Baloo,Arial,sans-serif;font-size:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 2px 1px}
+.home-level-stars{height:11px;line-height:11px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:.5px;color:#d39a47;white-space:nowrap}
 .home-level-button:hover{background:#f4e9fa;transform:translateY(-2px)}
 .home-level-button:active{transform:translateY(2px);box-shadow:0 1px 0 #d5c5d0}
 .home-level-button.current{border:2px solid #7d62ae;background:#eae0f7;box-shadow:0 3px 0 #a38ac2}

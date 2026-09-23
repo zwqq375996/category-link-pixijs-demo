@@ -4,6 +4,10 @@ A browser puzzle game built with PixiJS. Connect matching tiles, collect each ca
 
 The playable levels, artwork, audio, and font are bundled with this project.
 
+## Star ratings
+
+Every win earns at least one star. Each level has its own remaining-move targets for two and three stars, visible in Settings. The targets are provisional: they use the median remaining moves of successful newcomer and practiced runs in the seeded difficulty evaluation. Bonus moves and long-chain refunds count toward the remaining-move total; hints and shuffles do not reduce stars. The level picker saves the highest stars earned on this device. Earlier completions have no recorded stars until replayed.
+
 ## Run locally
 
 ```sh

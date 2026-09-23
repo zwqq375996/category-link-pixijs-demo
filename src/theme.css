@@ -246,6 +246,7 @@ button.sound-off{background:#eee9e7;color:#aaa0ad}
 .settings-option svg{width:20px;height:20px;flex:none}
 .settings-option .settings-value{margin-left:auto;color:#9b87ae;font-size:12px}
 .settings-option[aria-pressed="false"] svg{opacity:.45}
+.modal .star-targets{margin:-3px 0 15px;color:#806f8f;font-size:11px;line-height:1.5}
 .modal{max-height:calc(100dvh - 70px);overflow-y:auto}
 .mechanic-tag{background:#eadff1;color:#785c9c;border:1px solid #dbc8e8}
 .modal dl{background:#f0e8f1;border:1px solid #e5d7e7}
