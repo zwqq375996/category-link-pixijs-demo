@@ -237,6 +237,9 @@ button.sound-off{background:#eee9e7;color:#aaa0ad}
   .message{height:27px}
   .actions .action{height:45px}
 }
+@media(max-width:520px){
+  .ios-device .game{padding-top:max(62px,calc(14px + env(safe-area-inset-top)))}
+}
 @media(prefers-reduced-motion:reduce){
   .target.done,.modal{animation:none}
   .action,.icon-btn{transition:none}

@@ -150,6 +150,10 @@
   .home-status{margin-top:5px}
   .home-footer{height:18px}
 }
+@media(max-width:520px){
+  .ios-device .home{padding-top:max(62px,calc(18px + env(safe-area-inset-top)))}
+  .ios-device .home-levels{padding-top:max(68px,calc(28px + env(safe-area-inset-top)))}
+}
 @media(prefers-reduced-motion:reduce){
   .home-start,.home-choose,.home-level-button{transition:none}
 }
