@@ -1,4 +1,5 @@
 import { Application, Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
+import 'pixi.js/prepare';
 import { Game } from './model.js';
 import { bindPointer } from './pointer.js';
 import './style.css';
@@ -32,14 +33,21 @@ async function boot() {
   const app = new Application();
   await app.init({ width:448,height:420,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,preference:'webgl' });
   app.ticker.maxFPS=60;
-  board.appendChild(app.canvas); app.canvas.setAttribute('aria-label','拖动连接同类图片，松手合并');
+  board.appendChild(app.canvas);app.canvas.style.width='100%';app.canvas.style.height='100%';app.canvas.setAttribute('aria-label','拖动连接同类图片，松手合并');
   app.canvas.setAttribute('role','img');
   const pathsForLevel = level => [...new Set(level.groups.flatMap(g=>[g.symbol,...g.images]).filter(Boolean).map(assetUrl))];
+  async function prepareLevel(level){
+    const paths=new Set(level.groups.map(g=>g.symbol).filter(Boolean));
+    for(const t of [...level.tiles,...level.pending.slice(0,2).flat()]){
+      const path=level.groups[t.group]?.images[t.image];if(path)paths.add(path);
+    }
+    await app.renderer.prepare.upload([...paths].map(path=>Assets.get(assetUrl(path))));
+  }
   await Assets.load(pathsForLevel(levels[0]));
   const bg = new Graphics(), tileLayer = new Container(), lines = new Graphics(), effects = new Container();
   app.stage.addChild(bg,tileLayer,lines,effects);
   let game, currentLevel=0, selected=[], hint=[], hintUntil=0, gestures=null, busy=false, muted=false, modal=false, epoch=0;
-  let W=448,H=420,cell=100,gap=9,left=0,bottom=0,views=new Map(),time=0,messageUntil=0,previousStatus='playing';
+  let W=448,H=420,cell=100,gap=9,left=0,bottom=0,views=new Map(),time=0,messageUntil=0,previousStatus='playing',laidOutGame=null,renderedTargetLevel=null,renderedQueueRow;
   const tweens=[]; const sounds={};
   for (const name of ['select','merge','wrong','complete','win']) { sounds[name]=new Audio(assetUrl(`/assets/${name}.wav`));sounds[name].volume=name==='select'?.16:.3; }
   function sound(name) { if(muted)return;const a=sounds[name].cloneNode();a.volume=sounds[name].volume;a.play().catch(()=>{}); }
@@ -47,16 +55,21 @@ async function boot() {
   function tween(duration,step) { const token=epoch;return new Promise(resolve=>tweens.push({start:time,duration,step,resolve,token})); }
   function pos(t){return {x:left+t.x*(cell+gap)+cell/2,y:bottom-t.y*(cell+gap)-cell/2};}
   function layout(){
-    const b=board.getBoundingClientRect();H=Math.max(250,b.height*448/b.width);app.renderer.resize(W,H);app.canvas.style.width="100%";app.canvas.style.height="100%";
+    const b=board.getBoundingClientRect();if(!b.width)return;
+    const nextH=Math.max(250,Math.round(b.height*W/b.width));
+    if(nextH===H&&laidOutGame===game)return;
+    if(nextH!==H){H=nextH;app.renderer.resize(W,H);app.canvas.style.width='100%';app.canvas.style.height='100%';}
     if(!game)return;cell=Math.min(112,(W-42-(game.cols-1)*gap)/game.cols,(H-28-(game.rows-1)*gap)/game.rows);
     left=(W-(game.cols*cell+(game.cols-1)*gap))/2;bottom=(H+(game.rows*cell+(game.rows-1)*gap))/2;
     bg.clear();
     for(let y=0;y<game.rows;y++)for(let x=0;x<game.cols;x++){const p=pos({x,y});bg.roundRect(p.x-cell/2,p.y-cell/2,cell,cell,16).fill({color:0xd9d9eb,alpha:.36});}
     for(const t of game.tiles){const v=views.get(t.id);if(v){Object.assign(v.root,pos(t));drawTile(v,t);}}
-    drawLine();
+    laidOutGame=game;drawLine();
   }
   function text(value,size,color){const t=new Text({text:value,style:{fontFamily:'Arial',fontSize:size,fontWeight:'bold',fill:color}});t.anchor.set(.5);return t;}
+  const tileAppearance=t=>`${t.group}:${t.image}:${t.count}:${t.hiddenCounter}:${t.restriction}:${t.extraMoves}`;
   function drawTile(v,t){
+    v.appearance=tileAppearance(t);
     v.base.clear().roundRect(-cell/2,-cell/2+4,cell,cell,Math.min(18,cell*.18)).fill(0xcac7df)
       .roundRect(-cell/2,-cell/2,cell,cell,Math.min(18,cell*.18)).fill(t.restriction===7?0xffe7a8:t.count>1?0xf2edff:0xffffff)
       .roundRect(-cell/2+2,-cell/2+2,cell-4,cell-4,Math.min(17,cell*.17)).stroke({width:1,color:0xffffff,alpha:.8});
@@ -76,9 +89,9 @@ async function boot() {
   function sync(animate=false){
     const valid=new Set(game.tiles.map(t=>t.id));for(const[id,v]of views)if(!valid.has(id)){v.root.destroy({children:true});views.delete(id);}
     const jobs=[];
-    for(const t of game.tiles){let v=views.get(t.id),fresh=!v;if(!v){v=newView(t);views.set(t.id,v);}
-      drawTile(v,t);const target=pos(t);const origin=fresh?{x:target.x,y:target.y-cell*.4}:{x:v.root.x,y:v.root.y};
-      if(animate){v.root.alpha=fresh?0:1;v.root.scale.set(1);jobs.push(tween(.24,p=>{const q=1-(1-p)**3;v.root.position.set(origin.x+(target.x-origin.x)*q,origin.y+(target.y-origin.y)*q);v.root.alpha=fresh?q:1;}));}
+    for(const t of game.tiles){let v=views.get(t.id),fresh=!v;if(!v){v=newView(t);views.set(t.id,v);}else if(v.appearance!==tileAppearance(t))drawTile(v,t);
+      const target=pos(t);const origin=fresh?{x:target.x,y:target.y-cell*.4}:{x:v.root.x,y:v.root.y};
+      if(animate&&(fresh||Math.abs(origin.x-target.x)>.5||Math.abs(origin.y-target.y)>.5)){v.root.alpha=fresh?0:1;v.root.scale.set(1);jobs.push(tween(.24,p=>{const q=1-(1-p)**3;v.root.position.set(origin.x+(target.x-origin.x)*q,origin.y+(target.y-origin.y)*q);v.root.alpha=fresh?q:1;}));}
       else{v.root.position.set(target.x,target.y);v.root.alpha=1;v.root.scale.set(1);}
     }
     drawLine();updateHud();return Promise.all(jobs);
@@ -88,18 +101,35 @@ async function boot() {
     for(const[id,v]of views){v.ring.clear();if(ids.includes(id)){v.ring.roundRect(-cell/2,-cell/2,cell,cell,Math.min(18,cell*.18)).stroke({width:3,color:selected.length?color:0xd5b05e});}}
     if(ids.length>1){const ps=ids.map(id=>views.get(id)).filter(Boolean).map(v=>v.root.position);lines.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))lines.lineTo(p.x,p.y);lines.stroke({color:selected.length?color:0xd5b05e,width:Math.max(5,cell*.058),cap:'round',join:'round',alpha:selected.length?.8:.48});for(const p of ps)lines.circle(p.x,p.y,4).fill({color:0xffffff,alpha:.9});}
   }
+  function updateButtons(){for(const id of ['hint','shuffle'])$(id).disabled=game.status!=='playing'||busy;}
   function updateHud(){
     $('moves').textContent=game.level.moves>0?game.moves:'∞';$('moves').parentElement.classList.toggle('danger',game.level.moves>0&&game.moves<=5);
     $('progress').textContent=`${game.complete.size} / ${game.level.groups.length}`;
-    $('targets').innerHTML=game.level.groups.map((g,i)=>{const done=game.complete.has(i),largest=done?game.totals[i]:Math.max(0,...game.tiles.filter(t=>t.group===i).map(t=>t.count));return `<div class="target ${done?'done':''}" title="${escape(g.name)}"><img src="${assetUrl(g.symbol)}" alt=""><div><div class="name">${escape(g.name)}</div><div class="number">${done?'✓':largest+' / '+game.totals[i]}<span class="dot"><i style="width:${largest/game.totals[i]*100}%"></i></span></div></div></div>`;}).join('');
-    const row=game.pending[0]||[];$('queue').innerHTML=row.map(t=>t.hiddenCounter?`<span class="queue-hidden" aria-label="隐藏图块">?</span>`:t.restriction===7?`<span class="queue-extra" aria-label="加 ${t.extraMoves} 步">+${t.extraMoves}</span>`:`<img src="${assetUrl(game.level.groups[t.group].images[t.image])}" alt="${escape(game.level.groups[t.group].name)}">`).join('');
-    $('queue-label').textContent=row.length?'待补入':'所有图块已入场';$('queue-count').textContent=row.length?`剩余 ${game.pending.length} 排`:'';
-    for(const id of ['hint','shuffle'])$(id).disabled=game.status!=='playing'||busy;
+    if(renderedTargetLevel!==game.level){
+      $('targets').innerHTML=game.level.groups.map(g=>`<div class="target" title="${escape(g.name)}"><img src="${assetUrl(g.symbol)}" alt=""><div><div class="name">${escape(g.name)}</div><div class="number"><span class="target-value"></span><span class="dot"><i></i></span></div></div></div>`).join('');
+      renderedTargetLevel=game.level;renderedQueueRow=undefined;
+    }
+    game.level.groups.forEach((_,i)=>{
+      const done=game.complete.has(i),largest=done?game.totals[i]:Math.max(0,...game.tiles.filter(t=>t.group===i).map(t=>t.count));
+      const card=$('targets').children[i],value=card.querySelector('.target-value'),bar=card.querySelector('.dot i');
+      card.classList.toggle('done',done);
+      const label=done?'✓':`${largest} / ${game.totals[i]}`;
+      if(value.textContent!==label)value.textContent=label;
+      const width=`${largest/game.totals[i]*100}%`;
+      if(bar.style.width!==width)bar.style.width=width;
+    });
+    const row=game.pending[0]||null;
+    if(renderedQueueRow!==row){
+      $('queue').innerHTML=(row||[]).map(t=>t.hiddenCounter?`<span class="queue-hidden" aria-label="隐藏图块">?</span>`:t.restriction===7?`<span class="queue-extra" aria-label="加 ${t.extraMoves} 步">+${t.extraMoves}</span>`:`<img src="${assetUrl(game.level.groups[t.group].images[t.image])}" alt="${escape(game.level.groups[t.group].name)}">`).join('');
+      renderedQueueRow=row;
+    }
+    $('queue-label').textContent=row?'待补入':'所有图块已入场';$('queue-count').textContent=row?`剩余 ${game.pending.length} 排`:'';
+    updateButtons();
   }
   async function loadLevel(index){
     const token=++epoch;selected=[];hint=[];gestures?.cancel();busy=true;
     say(`第 ${levels[index].id} 关加载中…`,'',20);
-    try { await Assets.load(pathsForLevel(levels[index])); }
+    try { await Assets.load(pathsForLevel(levels[index]));await prepareLevel(levels[index]); }
     catch(error){if(token===epoch){busy=false;say(`关卡素材加载失败：${error.message}`,'bad',20);}return;}
     if(token!==epoch)return;
     currentLevel=index;busy=false;previousStatus='playing';
@@ -119,7 +149,7 @@ async function boot() {
     busy=true;const token=epoch,result=game.collectExtra(id);
     if(result.kind!=='extraMoves'){busy=false;return;}
     sound('complete');say(`领取 +${result.amount} 步`,'good',3);
-    await sync(true);if(token!==epoch)return;busy=false;layout();updateHud();checkStatus();
+    await sync(true);if(token!==epoch)return;busy=false;layout();updateButtons();checkStatus();
   }
   function extend(id){
     if(!id||!selected.length)return;
@@ -155,14 +185,14 @@ async function boot() {
       const messages={short:'至少连接 2 个同类图块',path:'连线需要经过中间图块，请重新连接',limit:'一次最多连接 9 块',changed:'图块已变化，请重新连接',restricted:'隐藏、上锁或加步图块不能直接连线',ended:'本关已结束'};
       say(messages[validation.reason]||'请重新连接图块','bad');return;
     }
-    const token=epoch;busy=true;updateHud();const valid=validation.kind==='valid';
+    const token=epoch;busy=true;updateButtons();const valid=validation.kind==='valid';
     if(valid){const target=views.get(ids.at(-1)).root.position.clone();sound('merge');await tween(.22,p=>{const q=p*p;for(const id of ids.slice(0,-1)){const v=views.get(id);if(!v)continue;const start=pos(game.tile(id));v.root.position.set(start.x+(target.x-start.x)*q,start.y+(target.y-start.y)*q);v.root.scale.set(1-p*.45);v.root.alpha=1-p*.7;}});}
     else{sound('wrong');await tween(.28,p=>{for(const id of ids){const t=game.tile(id),v=views.get(id);if(t&&v)v.root.x=pos(t).x+Math.sin(p*Math.PI*6)*7*(1-p);}});}
     if(token!==epoch)return;const result=game.submit(ids);
     if(result.kind==='complete'){sound('complete');burst(pos(game.tile(result.target)||{x:game.cols/2-.5,y:game.rows/2-.5}));say(`${game.level.groups[result.group].name} · 收集完成！${result.unlocked.length?` 解锁 ${result.unlocked.length} 块`:''}`,'good',3);}
     else if(result.kind==='merge')say(result.unlocked.length?`合并成功 · 解锁 ${result.unlocked.length} 块`:result.revealed.length?`合并成功 · 揭开 ${result.revealed.length} 块隐藏图块`:`合并成功 · ${result.count} / ${game.totals[result.group]}`,'good');
     else if(result.kind==='wrong')say('分类不同，少了 1 步，再试试','bad');
-    await sync(true);if(token!==epoch)return;busy=false;layout();updateHud();checkStatus();
+    await sync(true);if(token!==epoch)return;busy=false;layout();updateButtons();checkStatus();
   }
   function burst(p){for(let i=0;i<20;i++){const g=new Graphics().roundRect(-3,-5,6,10,2).fill([0xb599e4,0x76ccbf,0xf1c978,0xed9dba][i%4]);g.position.set(p.x,p.y);effects.addChild(g);const angle=Math.random()*Math.PI*2,speed=40+Math.random()*110;tween(.65,q=>{g.x=p.x+Math.cos(angle)*speed*q;g.y=p.y+Math.sin(angle)*speed*q+80*q*q;g.rotation=q*8;g.alpha=1-q;}).then(()=>{if(!g.destroyed)g.destroy();});}}
   function openModal(html){modal=true;gestures?.cancel();selected=[];drawLine();$('overlay').hidden=false;$('modal').innerHTML=html;$('modal').focus();}
@@ -172,7 +202,7 @@ async function boot() {
   $('level').onchange=e=>loadLevel(Number(e.target.value));
   $('reset').onclick=()=>{if(busy)return;loadLevel(currentLevel);};
   $('hint').onclick=()=>{if(busy||modal)return;hint=game.hint();hintUntil=time+3.5;drawLine();say(hint.length?'沿着金色连线拖动试试':'当前没有可连的同类，试试洗牌',hint.length?'good':'');};
-  $('shuffle').onclick=async()=>{if(busy||modal)return;busy=true;selected=[];hint=[];game.shuffle();say('图块换了位置，继续找同类吧');sound('merge');await sync(true);busy=false;layout();updateHud();};
+  $('shuffle').onclick=async()=>{if(busy||modal)return;busy=true;selected=[];hint=[];game.shuffle();say('图块换了位置，继续找同类吧');sound('merge');await sync(true);busy=false;layout();updateButtons();};
   $('sound').onclick=()=>{muted=!muted;$('sound').classList.toggle('sound-off',muted);$('sound').setAttribute('aria-label',muted?'打开声音':'关闭声音');$('sound').setAttribute('aria-pressed',String(!muted));};
   $('help').onclick=()=>{if(busy)return;openModal(`<div class="big-icon">✧</div><h2 id="modal-title">连起来，归一类</h2><dl><dt>① 拖动连线</dt><dd>按住图块，经过同一分类的其他图块，松手即可合并。往回拖可以撤回连线。</dd><dt>② 凑齐一组</dt><dd>合并后的图块显示累计数量；收齐这个分类的所有图片，就会整组消除。</dd><dt>③ 留意补行</dt><dd>棋盘空出整行后，上方预览的候补牌会按顺序入场；每次最多补两排。混合不同分类会损失一步；没有思路时可用提示和洗牌。</dd><dt>④ 特殊图块</dt><dd>隐藏图块要连周围图块逐层揭开；钥匙随有效合并解开同编号的锁；金色 +5 图块点按即可在试玩版领取步数。</dd></dl><button class="action primary" id="resume">继续游戏</button>`);$('resume').onclick=closeModal;};
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(modal&&game.status==='playing')closeModal();else{selected=[];gestures?.cancel();drawLine();}}});
