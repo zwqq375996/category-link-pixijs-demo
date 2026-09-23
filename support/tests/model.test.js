@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { Game } from '../src/model.js';
+import { Game } from '../../game/src/model.js';
 const sample = () => ({ cols:3, rows:2, moves:10, seconds:60, groups:[{name:'A'},{name:'B'}], tiles:[{group:0,image:0,x:0,y:0},{group:0,image:1,x:1,y:0},{group:1,image:0,x:2,y:0}], pending:[[{group:0,image:2,x:0,y:0},{group:1,image:1,x:1,y:0}]] });
 test('partial merge retains group inventory and final tile identity',()=>{const g=new Game(sample());const r=g.submit([1,2]);assert.equal(r.kind,'merge');assert.equal(g.tile(2).count,2);assert.equal(g.moves,9);g.assertValid();});
 test('mixed category costs one move and removes nothing',()=>{const g=new Game(sample());assert.equal(g.submit([2,3]).kind,'wrong');assert.equal(g.tiles.length,3);assert.equal(g.moves,9);});
@@ -131,7 +131,7 @@ test('a final hidden tile is revealed when its only visible partner cannot uncov
 });
 
 test('level 15 remains finishable after the former hidden-tile dead end', () => {
-  const level=JSON.parse(readFileSync(new URL('../public/levels.json',import.meta.url))).levels[14];
+  const level=JSON.parse(readFileSync(new URL('../../game/public/levels.json',import.meta.url))).levels[14];
   const game=new Game(level);
   let seed=level.id*18079,shuffles=0,rescued=0;
   const random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/2**32);

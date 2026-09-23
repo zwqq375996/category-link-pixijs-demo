@@ -1,0 +1,9 @@
+{
+  "name": "link-and-sort-support",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "evaluate": "node scripts/evaluate-levels.mjs"
+  }
+}

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { bindPointer } from '../src/pointer.js';
-import { Game } from '../src/model.js';
+import { bindPointer } from '../../game/src/pointer.js';
+import { Game } from '../../game/src/model.js';
 function fixture(captureFails=false) {
   const canvas=new EventTarget(), host=new EventTarget();
   let captured=false, releases=0, cancels=0, selection=[];

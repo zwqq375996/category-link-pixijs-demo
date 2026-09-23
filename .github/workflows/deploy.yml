@@ -26,12 +26,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: game/package-lock.json
       - run: npm ci
+        working-directory: game
       - run: npm test
+        working-directory: support
+      - run: cp support/legacy-pages-assets/* game/public/assets/
       - run: npm run build -- --base="/${GITHUB_REPOSITORY#*/}/"
+        working-directory: game
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: game/dist
       - id: deployment
         uses: actions/deploy-pages@v4

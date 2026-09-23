@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { starTargets, starsForRemaining } from '../src/ratings.js';
+import { starTargets, starsForRemaining } from '../../game/src/ratings.js';
 
-const levels=JSON.parse(readFileSync(new URL('../public/levels.json',import.meta.url))).levels;
+const levels=JSON.parse(readFileSync(new URL('../../game/public/levels.json',import.meta.url))).levels;
 
 test('every level has ordered, reachable remaining-move star targets',()=>{
   for(const level of levels){

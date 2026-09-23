@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { evaluate, play, profiles } from '../scripts/evaluate-levels.mjs';
 
-const level=JSON.parse(readFileSync(new URL('../public/levels.json',import.meta.url))).levels[0];
+const level=JSON.parse(readFileSync(new URL('../../game/public/levels.json',import.meta.url))).levels[0];
 
 test('a seeded player simulation is repeatable and uses valid game actions', () => {
   const first=play(level,profiles.newcomer,41893);

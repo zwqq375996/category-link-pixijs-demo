@@ -1,7 +1,7 @@
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
-import { Game } from '../src/model.js';
+import { Game } from '../../game/src/model.js';
 
 // These are explicit hypotheses about play styles, not estimates of real users.
 export const profiles = {
@@ -158,9 +158,11 @@ function parseArgs(argv) {
     else if(key==='--seed')options.seed=Number(argv[++i]);
     else if(key==='--output')options.output=argv[++i];
     else if(key==='--baseline-rev')options.baselineRev=argv[++i];
+    else if(key==='--baseline-file')options.baselineFile=argv[++i];
     else throw Error(`Unknown argument ${key}`);
   }
   if(!Number.isInteger(options.runs)||options.runs<1||!Number.isInteger(options.seed))throw Error('Invalid runs or seed');
+  if(options.baselineRev&&options.baselineFile)throw Error('Choose either --baseline-rev or --baseline-file');
   return options;
 }
 
@@ -217,12 +219,17 @@ function compact(results) {
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   const options=parseArgs(process.argv.slice(2));
-  const levels=JSON.parse(readFileSync(new URL('../public/levels.json',import.meta.url))).levels;
+  const levels=JSON.parse(readFileSync(new URL('../../game/public/levels.json',import.meta.url))).levels;
   const report={generatedAt:new Date().toISOString(),runs:options.runs,seed:options.seed,profiles,current:evaluate(levels,options)};
-  if(options.baselineRev){
-    const content=execFileSync('git',['show',`${options.baselineRev}:public/levels.json`],{encoding:'utf8'});
+  if(options.baselineRev||options.baselineFile){
+    let content;
+    if(options.baselineFile)content=readFileSync(options.baselineFile,'utf8');
+    else for(const path of ['game/public/levels.json','public/levels.json']){
+      try{content=execFileSync('git',['show',`${options.baselineRev}:${path}`],{encoding:'utf8',stdio:['ignore','pipe','ignore']});break;}catch{}
+    }
+    if(!content)throw Error(`No level configuration in revision ${options.baselineRev}`);
     report.baseline=evaluate(JSON.parse(content).levels,{...options,levelNumbers:[11,12,13,14]});
-    report.baselineRevision=options.baselineRev;
+    report.baselineRevision=options.baselineRev||options.baselineFile;
   }
   mkdirSync(new URL(`../${options.output.slice(0,options.output.lastIndexOf('/')+1)}`,import.meta.url),{recursive:true});
   const compactReport={...report,current:compact(report.current)};
