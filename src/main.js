@@ -20,14 +20,12 @@ async function boot() {
   const appRoot = document.querySelector('#app');
   appRoot.innerHTML = `<section class="game" aria-label="Category Link 连线归类游戏">
     <header class="top"><div class="brand">CATEGORY <b>LINK</b><small>连 线 · 归 类</small></div><div class="tools-top"><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
-    <div class="disclaimer" role="note">非官方学习演示 · 与原版开发者无关联</div>
     <div class="hud"><div class="level-picker"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div><div class="stat"><small>剩余步数</small><strong id="moves">—</strong></div><div class="stat"><small>剩余时间</small><strong id="timer">—</strong></div></div>
     <div class="targets-label"><span>收集所有分类</span><span id="progress">0 / 4</span></div><div class="targets" id="targets" aria-label="分类收集进度"></div>
     <div class="upcoming"><span id="queue-label">待补入</span><div class="queue" id="queue"></div><span class="queue-count" id="queue-count"></span></div>
     <div class="board" id="board" aria-label="游戏棋盘"></div>
     <div class="message" id="message" role="status" aria-live="polite">拖动连接同类图块，松手合并</div>
     <div class="actions"><button class="action primary" id="hint">${icon('hint')}提示</button><button class="action" id="shuffle">${icon('shuffle')}洗牌</button><button class="action" id="reset">${icon('reset')}重开</button></div>
-    <div class="foot">试玩版 · 原始关卡 1–30 · 鼠标 / 触摸拖动</div>
     <div class="overlay" id="overlay" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" id="modal"></section></div>
   </section>`;
   const $ = id => document.getElementById(id);
