@@ -51,8 +51,14 @@ async function boot() {
   gamePanels.forEach(el=>{el.inert=true;});
   const board = $('board');
   const app = new Application();
-  await app.init({ width:448,height:420,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,preference:'webgl' });
+  await app.init({ width:448,height:420,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,preference:'webgl',autoStart:false });
   app.ticker.maxFPS=60;
+  let renderQueued=false;
+  function requestRender(){
+    if(renderQueued||app.ticker.started)return;
+    renderQueued=true;
+    requestAnimationFrame(()=>{renderQueued=false;if(!app.ticker.started)app.render();});
+  }
   board.appendChild(app.canvas);app.canvas.style.width='100%';app.canvas.style.height='100%';app.canvas.setAttribute('aria-label','拖动连接同类图片，松手合并');
   app.canvas.setAttribute('role','img');
   const pathsForLevel = level => [...new Set(level.groups.flatMap(g=>[g.symbol,...g.images]).filter(Boolean).map(assetUrl))];
@@ -75,13 +81,23 @@ async function boot() {
   await Assets.load(pathsForLevel(levels[0]));
   const bg = new Graphics(), tileLayer = new Container(), lines = new Graphics(), effects = new Container();
   app.stage.addChild(bg,tileLayer,lines,effects);
-  let game, currentLevel=savedIndex, selected=[], hint=[], hintUntil=0, gestures=null, busy=false, muted=false, modal=false, epoch=0, hasEntered=false, homeWorking=false;
-  let W=448,H=420,cell=100,gap=9,left=0,bottom=0,views=new Map(),time=0,messageUntil=0,previousStatus='playing',laidOutGame=null,renderedTargetLevel=null,renderedTargetCards=[],renderedCompletionKey=null,renderedQueueRow;
+  let game, currentLevel=savedIndex, selected=[], hint=[], hintTimer=0, messageTimer=0, gestures=null, busy=false, muted=false, modal=false, epoch=0, hasEntered=false, homeWorking=false;
+  let W=448,H=420,cell=100,gap=9,left=0,bottom=0,views=new Map(),highlighted=new Map(),previousStatus='playing',laidOutGame=null,renderedTargetLevel=null,renderedTargetCards=[],renderedCompletionKey=null,renderedQueueRow;
   const tweens=[]; const sounds={};
   for (const name of ['select','merge','wrong','complete','win']) { sounds[name]=new Audio(assetUrl(`/assets/${name}.wav`));sounds[name].volume=name==='select'?.16:.3; }
   function sound(name) { if(muted)return;const a=sounds[name].cloneNode();a.volume=sounds[name].volume;a.play().catch(()=>{}); }
-  function say(text,kind='',seconds=2.5){const el=$('message'),className='message '+kind;if(el.textContent!==text)el.textContent=text;if(el.className!==className)el.className=className;messageUntil=seconds>0?time+seconds:0;}
-  function tween(duration,step) { const token=epoch;return new Promise(resolve=>tweens.push({start:time,duration,step,resolve,token})); }
+  function say(text,kind='',seconds=2.5){
+    const el=$('message'),className='message '+kind;
+    if(el.textContent!==text)el.textContent=text;
+    if(el.className!==className)el.className=className;
+    clearTimeout(messageTimer);
+    if(seconds>0)messageTimer=setTimeout(()=>{messageTimer=0;if(!selected.length)say('拖动连接同类图块，松手合并','',0);},seconds*1000);
+  }
+  function clearHint(){clearTimeout(hintTimer);hintTimer=0;hint=[];}
+  function tween(duration,step) {
+    const token=epoch;
+    return new Promise(resolve=>{tweens.push({start:performance.now()/1000,duration,step,resolve,token});app.ticker.start();});
+  }
   function pos(t){return {x:left+t.x*(cell+gap)+cell/2,y:bottom-t.y*(cell+gap)-cell/2};}
   function layout(){
     const b=board.getBoundingClientRect();if(!b.width)return;
@@ -97,7 +113,7 @@ async function boot() {
         .roundRect(p.x-cell/2+.5,p.y-cell/2+.5,cell-1,cell-1,r).stroke({width:1,color:0xd9c8ee,alpha:.16});
     }
     for(const t of game.tiles){const v=views.get(t.id);if(v){Object.assign(v.root,pos(t));drawTile(v,t);}}
-    laidOutGame=game;drawLine();
+    laidOutGame=game;highlighted.clear();drawLine();
   }
   function text(value,size,color){const t=new Text({text:value,style:{fontFamily:'Arial',fontSize:size,fontWeight:'bold',fill:color}});t.anchor.set(.5);return t;}
   const tileAppearance=t=>`${t.group}:${t.image}:${t.count}:${t.hiddenCounter}:${t.restriction}:${t.extraMoves}`;
@@ -140,9 +156,16 @@ async function boot() {
     drawLine();updateHud();return Promise.all(jobs);
   }
   function drawLine(){
-    lines.clear();const ids=selected.length?selected:(time<hintUntil?hint:[]);const wrong=selected.length>1&&selected.some(id=>game.tile(id)?.group!==game.tile(selected[0])?.group);const color=wrong?0xea8798:0x70cccb;
-    for(const[id,v]of views){v.ring.clear();if(ids.includes(id)){v.ring.roundRect(-cell/2,-cell/2,cell,cell,Math.min(18,cell*.18)).stroke({width:Math.max(3,cell*.045),color:selected.length?color:0xf4cb78});}}
+    lines.clear();const ids=selected.length?selected:hint;const wrong=selected.length>1&&selected.some(id=>game.tile(id)?.group!==game.tile(selected[0])?.group);const color=wrong?0xea8798:0x70cccb;
+    const ringColor=selected.length?color:0xf4cb78,nextHighlighted=new Map(ids.map(id=>[id,ringColor]));
+    for(const id of highlighted.keys())if(!nextHighlighted.has(id))views.get(id)?.ring.clear();
+    for(const [id,currentColor] of nextHighlighted)if(highlighted.get(id)!==currentColor){
+      const ring=views.get(id)?.ring;if(!ring)continue;
+      ring.clear().roundRect(-cell/2,-cell/2,cell,cell,Math.min(18,cell*.18)).stroke({width:Math.max(3,cell*.045),color:currentColor});
+    }
+    highlighted=nextHighlighted;
     if(ids.length>1){const ps=ids.map(id=>views.get(id)).filter(Boolean).map(v=>v.root.position);lines.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))lines.lineTo(p.x,p.y);lines.stroke({color:selected.length?color:0xf4cb78,width:Math.max(9,cell*.11),cap:'round',join:'round',alpha:.21});lines.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))lines.lineTo(p.x,p.y);lines.stroke({color:selected.length?color:0xf4cb78,width:Math.max(4,cell*.052),cap:'round',join:'round',alpha:.93});for(const p of ps)lines.circle(p.x,p.y,3.5).fill({color:0xffffff,alpha:.95});}
+    requestRender();
   }
   function updateButtons(){for(const id of ['hint','shuffle'])$(id).disabled=game.status!=='playing'||busy;}
   function updateHud(){
@@ -182,7 +205,7 @@ async function boot() {
     if('requestIdleCallback' in window)requestIdleCallback(start,{timeout:1500});else setTimeout(start,800);
   }
   async function loadLevel(index,showIntro=true){
-    const token=++epoch;selected=[];hint=[];gestures?.cancel();busy=true;
+    const token=++epoch;selected=[];clearHint();gestures?.cancel();busy=true;
     say(`第 ${levels[index].id} 关加载中…`,'',20);
     try { await ensureLevelReady(index); }
     catch(error){if(token===epoch){busy=false;say(`关卡素材加载失败：${error.message}`,'bad',20);}return false;}
@@ -203,7 +226,7 @@ async function boot() {
     const tile=game.tile(id);
     if(tile.restriction===7){collectExtra(id);return false;}
     if(!game.selectable(tile)){say(tile.hiddenCounter?'隐藏图块暂时不能选，连相邻图块揭开它':'锁住的图块暂时不能选，先连接对应钥匙','bad');return false;}
-    selected=[id];hint=[];sound('select');drawLine();return true;
+    selected=[id];clearHint();sound('select');drawLine();return true;
   }
   async function collectExtra(id){
     busy=true;const token=epoch,result=game.collectExtra(id);
@@ -239,7 +262,7 @@ async function boot() {
     cancel:()=>{selected=[];drawLine();say('连线已取消，请重新拖动');}
   });
   async function commit(){
-    if(busy||modal||game.status!=='playing')return;const ids=[...selected];selected=[];hint=[];drawLine();
+    if(busy||modal||game.status!=='playing')return;const ids=[...selected];selected=[];clearHint();drawLine();
     const validation=game.validateSelection(ids);
     if(validation.kind==='ignored'){
       const messages={short:'至少连接 2 个同类图块',path:'连线需要经过中间图块，请重新连接',limit:'一次最多连接 9 块',changed:'图块已变化，请重新连接',restricted:'隐藏、上锁或加步图块不能直接连线',ended:'本关已结束'};
@@ -295,7 +318,7 @@ async function boot() {
   }
   function showHome(){
     if(busy||!game)return;
-    closeModal();selected=[];hint=[];drawLine();
+    closeModal();selected=[];clearHint();drawLine();
     $('home-levels').hidden=true;$('home-content').inert=false;$('home').hidden=false;
     gamePanels.forEach(el=>{el.inert=true;});
     updateHome();$('home-start').focus({preventScroll:true});
@@ -346,17 +369,25 @@ async function boot() {
   $('home-choose').onclick=()=>{$('home-content').inert=true;$('home-levels').hidden=false;$('home-back').focus({preventScroll:true});};
   $('home-back').onclick=()=>{if(homeWorking)return;$('home-levels').hidden=true;$('home-content').inert=false;$('home-choose').focus({preventScroll:true});};
   $('home-levels').onclick=e=>{const button=e.target instanceof Element?e.target.closest('[data-home-level]'):null;if(button)openHomeLevel(Number(button.dataset.homeLevel));};
-  $('hint').onclick=()=>{if(busy||modal)return;hint=game.hint();hintUntil=time+3.5;drawLine();say(hint.length?'沿着金色连线拖动试试':'当前没有可连的同类，试试洗牌',hint.length?'good':'');};
-  $('shuffle').onclick=async()=>{if(busy||modal)return;busy=true;selected=[];hint=[];game.shuffle();say('图块换了位置，继续找同类吧');sound('merge');await sync(true);busy=false;layout();updateButtons();};
+  $('hint').onclick=()=>{if(busy||modal)return;clearHint();hint=game.hint();hintTimer=setTimeout(()=>{clearHint();drawLine();},3500);drawLine();say(hint.length?'沿着金色连线拖动试试':'当前没有可连的同类，试试洗牌',hint.length?'good':'');};
+  $('shuffle').onclick=async()=>{if(busy||modal)return;busy=true;selected=[];clearHint();game.shuffle();say('图块换了位置，继续找同类吧');sound('merge');await sync(true);busy=false;layout();updateButtons();};
   $('sound').onclick=()=>{muted=!muted;$('sound').classList.toggle('sound-off',muted);$('sound').setAttribute('aria-label',muted?'打开声音':'关闭声音');$('sound').setAttribute('aria-pressed',String(!muted));};
   $('help').onclick=()=>{if(busy)return;openModal(`<div class="big-icon">✧</div><h2 id="modal-title">连起来，归一类</h2><dl><dt>① 拖动连线</dt><dd>按住图块，经过同一分类的其他图块，松手即可合并。往回拖可以撤回连线。</dd><dt>② 凑齐一组</dt><dd>合并后的图块显示累计数量；收齐这个分类的所有图片，就会整组消除。</dd><dt>③ 留意补行</dt><dd>棋盘空出整行后，上方预览的候补牌会按顺序入场；每次最多补两排。混合不同分类会损失一步；没有思路时可用提示和洗牌。</dd><dt>④ 特殊图块</dt><dd>隐藏图块要连周围图块逐层揭开；钥匙随有效合并解开同编号的锁；金色 +5 图块点按即可在试玩版领取步数。</dd></dl><button class="action primary" id="resume">继续游戏</button>`);$('resume').onclick=closeModal;};
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){
     if(!$('home').hidden){if(!$('home-levels').hidden&&!homeWorking){$('home-levels').hidden=true;$('home-content').inert=false;$('home-choose').focus({preventScroll:true});}return;}
     if(modal&&game.status==='playing')closeModal();else{selected=[];gestures?.cancel();drawLine();}
   }});
-  app.ticker.add(ticker=>{const dt=Math.min(ticker.deltaMS/1000,.08);time+=dt;
-    for(let i=tweens.length-1;i>=0;i--){const t=tweens[i];if(t.token!==epoch){tweens.splice(i,1);t.resolve();continue;}const p=Math.min(1,(time-t.start)/t.duration);t.step(p);if(p>=1){tweens.splice(i,1);t.resolve();}}
-    if(game){if(hint.length&&time>=hintUntil){hint=[];drawLine();}if(messageUntil&&time>messageUntil&&!selected.length){messageUntil=0;say('拖动连接同类图块，松手合并','',0);}}});
+  app.ticker.add(()=>{
+    const now=performance.now()/1000;
+    for(let i=tweens.length-1;i>=0;i--){
+      const t=tweens[i];
+      if(t.token!==epoch){tweens.splice(i,1);t.resolve();continue;}
+      const p=Math.min(1,(now-t.start)/t.duration);
+      t.step(p);
+      if(p>=1){tweens.splice(i,1);t.resolve();}
+    }
+    if(!tweens.length){app.ticker.stop();requestRender();}
+  });
   new ResizeObserver(()=>{if(!busy)layout();}).observe(board);
   const initialLevelLoad=loadLevel(savedIndex,false);
   $('home-start').onclick=async()=>{
