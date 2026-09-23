@@ -1,0 +1,2351 @@
+{
+  "generatedAt": "2026-09-23T14:34:15.849Z",
+  "runs": 200,
+  "seed": 20260923,
+  "profiles": {
+    "newcomer": {
+      "label": "新手",
+      "hintRate": 0.08,
+      "mistakeRate": 0.06,
+      "stopRate": 0.4,
+      "earlyShuffle": 0.08,
+      "temperature": 2.4,
+      "lengthWeight": 0.35
+    },
+    "regular": {
+      "label": "普通",
+      "hintRate": 0.18,
+      "mistakeRate": 0.03,
+      "stopRate": 0.28,
+      "earlyShuffle": 0.035,
+      "temperature": 1.5,
+      "lengthWeight": 0.75
+    },
+    "practiced": {
+      "label": "熟练",
+      "hintRate": 0.1,
+      "mistakeRate": 0.005,
+      "stopRate": 0.07,
+      "earlyShuffle": 0.01,
+      "temperature": 0.65,
+      "lengthWeight": 1.4
+    }
+  },
+  "current": {
+    "1": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 93,
+          "median": 95,
+          "p90": 96,
+          "best": 96
+        },
+        "turnsMedian": 5,
+        "hintsMedian": 0,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 0
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 94,
+          "median": 95,
+          "p90": 96,
+          "best": 96
+        },
+        "turnsMedian": 5,
+        "hintsMedian": 1,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 0
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 95,
+          "median": 96,
+          "p90": 96,
+          "best": 96
+        },
+        "turnsMedian": 4,
+        "hintsMedian": 0,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 0
+      }
+    },
+    "2": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 25,
+          "median": 29,
+          "p90": 32,
+          "best": 35
+        },
+        "turnsMedian": 21,
+        "hintsMedian": 1,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 1
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 30,
+          "median": 33,
+          "p90": 37,
+          "best": 40
+        },
+        "turnsMedian": 17,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 0
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 33,
+          "median": 36,
+          "p90": 38,
+          "best": 40
+        },
+        "turnsMedian": 15,
+        "hintsMedian": 2,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 0
+      }
+    },
+    "3": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 13,
+          "median": 18,
+          "p90": 23,
+          "best": 29
+        },
+        "turnsMedian": 32,
+        "hintsMedian": 2,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 2
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 21,
+          "median": 26,
+          "p90": 30,
+          "best": 35
+        },
+        "turnsMedian": 26,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 26,
+          "median": 30,
+          "p90": 33,
+          "best": 37
+        },
+        "turnsMedian": 22,
+        "hintsMedian": 2,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 0
+      }
+    },
+    "4": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 191,
+        "losses": 9,
+        "stalled": 0,
+        "winRate": 0.955,
+        "winRate95": [
+          0.9167024063390322,
+          0.9761477282752958
+        ],
+        "remaining": {
+          "p10": 3,
+          "median": 8,
+          "p90": 12,
+          "best": 16
+        },
+        "turnsMedian": 33,
+        "hintsMedian": 2,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 2
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 10,
+          "median": 16,
+          "p90": 21,
+          "best": 24
+        },
+        "turnsMedian": 25,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 17,
+          "median": 20,
+          "p90": 23,
+          "best": 26
+        },
+        "turnsMedian": 21,
+        "hintsMedian": 2,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 0
+      }
+    },
+    "5": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 171,
+        "losses": 29,
+        "stalled": 0,
+        "winRate": 0.855,
+        "winRate95": [
+          0.7995121871510563,
+          0.8971071486469359
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 5,
+          "p90": 10,
+          "best": 16
+        },
+        "turnsMedian": 36,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 2
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 8,
+          "median": 12,
+          "p90": 18,
+          "best": 24
+        },
+        "turnsMedian": 29,
+        "hintsMedian": 5,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 13,
+          "median": 17,
+          "p90": 21,
+          "best": 26
+        },
+        "turnsMedian": 25,
+        "hintsMedian": 2,
+        "shufflesMedian": 0,
+        "shufflesP90": 0,
+        "wrongMedian": 0
+      }
+    },
+    "6": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 184,
+        "losses": 16,
+        "stalled": 0,
+        "winRate": 0.92,
+        "winRate95": [
+          0.8740095102048769,
+          0.9501598448237337
+        ],
+        "remaining": {
+          "p10": 2,
+          "median": 7,
+          "p90": 12,
+          "best": 22
+        },
+        "turnsMedian": 39,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 2
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 199,
+        "losses": 1,
+        "stalled": 0,
+        "winRate": 0.995,
+        "winRate95": [
+          0.9722256001302286,
+          0.999116854010634
+        ],
+        "remaining": {
+          "p10": 10,
+          "median": 16,
+          "p90": 21,
+          "best": 30
+        },
+        "turnsMedian": 31,
+        "hintsMedian": 5,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 14,
+          "median": 21,
+          "p90": 25,
+          "best": 30
+        },
+        "turnsMedian": 26,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "7": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 128,
+        "losses": 72,
+        "stalled": 0,
+        "winRate": 0.64,
+        "winRate95": [
+          0.5714139956562682,
+          0.7033091226866021
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 5,
+          "p90": 12,
+          "best": 21
+        },
+        "turnsMedian": 47,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 2
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 196,
+        "losses": 4,
+        "stalled": 0,
+        "winRate": 0.98,
+        "winRate95": [
+          0.9497121344948062,
+          0.9921956998236058
+        ],
+        "remaining": {
+          "p10": 7,
+          "median": 14,
+          "p90": 21,
+          "best": 26
+        },
+        "turnsMedian": 39,
+        "hintsMedian": 6,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 199,
+        "losses": 1,
+        "stalled": 0,
+        "winRate": 0.995,
+        "winRate95": [
+          0.9722256001302286,
+          0.999116854010634
+        ],
+        "remaining": {
+          "p10": 10,
+          "median": 19,
+          "p90": 26,
+          "best": 33
+        },
+        "turnsMedian": 34,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "8": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 182,
+        "losses": 18,
+        "stalled": 0,
+        "winRate": 0.91,
+        "winRate95": [
+          0.8622332538615105,
+          0.9423130212854665
+        ],
+        "remaining": {
+          "p10": 2,
+          "median": 6,
+          "p90": 11,
+          "best": 21
+        },
+        "turnsMedian": 44,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 10,
+          "median": 15,
+          "p90": 20,
+          "best": 26
+        },
+        "turnsMedian": 35,
+        "hintsMedian": 6,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 16,
+          "median": 20,
+          "p90": 24,
+          "best": 29
+        },
+        "turnsMedian": 31,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "9": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 179,
+        "losses": 21,
+        "stalled": 0,
+        "winRate": 0.895,
+        "winRate95": [
+          0.8448186177864638,
+          0.9302930375380627
+        ],
+        "remaining": {
+          "p10": 2,
+          "median": 7,
+          "p90": 12,
+          "best": 17
+        },
+        "turnsMedian": 43,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 2
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 10,
+          "median": 16,
+          "p90": 22,
+          "best": 30
+        },
+        "turnsMedian": 35,
+        "hintsMedian": 6,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 17,
+          "median": 21,
+          "p90": 26,
+          "best": 32
+        },
+        "turnsMedian": 30,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "10": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 65,
+        "losses": 135,
+        "stalled": 0,
+        "winRate": 0.325,
+        "winRate95": [
+          0.2639146705018621,
+          0.39268143156955027
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 2,
+          "p90": 6,
+          "best": 10
+        },
+        "turnsMedian": 53,
+        "hintsMedian": 4,
+        "shufflesMedian": 2,
+        "shufflesP90": 3,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 171,
+        "losses": 29,
+        "stalled": 0,
+        "winRate": 0.855,
+        "winRate95": [
+          0.7995121871510563,
+          0.8971071486469359
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 7,
+          "p90": 13,
+          "best": 19
+        },
+        "turnsMedian": 49,
+        "hintsMedian": 9,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 196,
+        "losses": 4,
+        "stalled": 0,
+        "winRate": 0.98,
+        "winRate95": [
+          0.9497121344948062,
+          0.9921956998236058
+        ],
+        "remaining": {
+          "p10": 4,
+          "median": 11,
+          "p90": 18,
+          "best": 23
+        },
+        "turnsMedian": 45,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 0
+      }
+    },
+    "11": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 143,
+        "losses": 57,
+        "stalled": 0,
+        "winRate": 0.715,
+        "winRate95": [
+          0.648845269187895,
+          0.773050948267227
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 5,
+          "p90": 10,
+          "best": 18
+        },
+        "turnsMedian": 46,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 199,
+        "losses": 1,
+        "stalled": 0,
+        "winRate": 0.995,
+        "winRate95": [
+          0.9722256001302286,
+          0.999116854010634
+        ],
+        "remaining": {
+          "p10": 7,
+          "median": 14,
+          "p90": 20,
+          "best": 26
+        },
+        "turnsMedian": 38,
+        "hintsMedian": 6,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 12,
+          "median": 19,
+          "p90": 24,
+          "best": 31
+        },
+        "turnsMedian": 33,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "12": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 197,
+        "losses": 3,
+        "stalled": 0,
+        "winRate": 0.985,
+        "winRate95": [
+          0.9568335194437211,
+          0.9948858548155076
+        ],
+        "remaining": {
+          "p10": 5,
+          "median": 11,
+          "p90": 19,
+          "best": 25
+        },
+        "turnsMedian": 49,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 14,
+          "median": 21,
+          "p90": 27,
+          "best": 36
+        },
+        "turnsMedian": 40,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 18,
+          "median": 24,
+          "p90": 31,
+          "best": 38
+        },
+        "turnsMedian": 36,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "13": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 130,
+        "losses": 70,
+        "stalled": 0,
+        "winRate": 0.65,
+        "winRate95": [
+          0.5816333576186576,
+          0.712712840605846
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 4,
+          "p90": 10,
+          "best": 13
+        },
+        "turnsMedian": 57,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 199,
+        "losses": 1,
+        "stalled": 0,
+        "winRate": 0.995,
+        "winRate95": [
+          0.9722256001302286,
+          0.999116854010634
+        ],
+        "remaining": {
+          "p10": 6,
+          "median": 13,
+          "p90": 20,
+          "best": 26
+        },
+        "turnsMedian": 48,
+        "hintsMedian": 8,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 13,
+          "median": 19,
+          "p90": 25,
+          "best": 34
+        },
+        "turnsMedian": 42,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "14": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 149,
+        "losses": 51,
+        "stalled": 0,
+        "winRate": 0.745,
+        "winRate95": [
+          0.6803694869280502,
+          0.8003959701719726
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 3,
+          "p90": 9,
+          "best": 13
+        },
+        "turnsMedian": 47,
+        "hintsMedian": 3,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 7,
+          "median": 13,
+          "p90": 18,
+          "best": 26
+        },
+        "turnsMedian": 37,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 12,
+          "median": 17,
+          "p90": 22,
+          "best": 26
+        },
+        "turnsMedian": 34,
+        "hintsMedian": 3,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "15": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 64,
+        "losses": 136,
+        "stalled": 0,
+        "winRate": 0.32,
+        "winRate95": [
+          0.2592642960770526,
+          0.38752026605354306
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 2,
+          "p90": 6,
+          "best": 11
+        },
+        "turnsMedian": 53,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 179,
+        "losses": 21,
+        "stalled": 0,
+        "winRate": 0.895,
+        "winRate95": [
+          0.8448186177864638,
+          0.9302930375380627
+        ],
+        "remaining": {
+          "p10": 2,
+          "median": 7,
+          "p90": 13,
+          "best": 20
+        },
+        "turnsMedian": 48,
+        "hintsMedian": 8,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 197,
+        "losses": 3,
+        "stalled": 0,
+        "winRate": 0.985,
+        "winRate95": [
+          0.9568335194437211,
+          0.9948858548155076
+        ],
+        "remaining": {
+          "p10": 5,
+          "median": 10,
+          "p90": 16,
+          "best": 22
+        },
+        "turnsMedian": 45,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "16": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 92,
+        "losses": 108,
+        "stalled": 0,
+        "winRate": 0.46,
+        "winRate95": [
+          0.39232931140961247,
+          0.5291783690638533
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 3,
+          "p90": 8,
+          "best": 17
+        },
+        "turnsMedian": 48,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 197,
+        "losses": 3,
+        "stalled": 0,
+        "winRate": 0.985,
+        "winRate95": [
+          0.9568335194437211,
+          0.9948858548155076
+        ],
+        "remaining": {
+          "p10": 5,
+          "median": 11,
+          "p90": 16,
+          "best": 20
+        },
+        "turnsMedian": 41,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 12,
+          "median": 18,
+          "p90": 23,
+          "best": 27
+        },
+        "turnsMedian": 35,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "17": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 15,
+        "losses": 185,
+        "stalled": 0,
+        "winRate": 0.075,
+        "winRate95": [
+          0.045974507057252416,
+          0.12004459797332034
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 2,
+          "p90": 3,
+          "best": 3
+        },
+        "turnsMedian": 45,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 129,
+        "losses": 71,
+        "stalled": 0,
+        "winRate": 0.645,
+        "winRate95": [
+          0.5765198448160798,
+          0.7080148134676072
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 4,
+          "p90": 10,
+          "best": 16
+        },
+        "turnsMedian": 42,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 191,
+        "losses": 9,
+        "stalled": 0,
+        "winRate": 0.955,
+        "winRate95": [
+          0.9167024063390322,
+          0.9761477282752958
+        ],
+        "remaining": {
+          "p10": 3,
+          "median": 9,
+          "p90": 14,
+          "best": 22
+        },
+        "turnsMedian": 38,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "18": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 70,
+        "losses": 130,
+        "stalled": 0,
+        "winRate": 0.35,
+        "winRate95": [
+          0.28728715939415395,
+          0.41836664238134236
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 3,
+          "p90": 7,
+          "best": 15
+        },
+        "turnsMedian": 58,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 192,
+        "losses": 8,
+        "stalled": 0,
+        "winRate": 0.96,
+        "winRate95": [
+          0.9230670617058012,
+          0.9795946128493436
+        ],
+        "remaining": {
+          "p10": 3,
+          "median": 11,
+          "p90": 20,
+          "best": 26
+        },
+        "turnsMedian": 50,
+        "hintsMedian": 9,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 9,
+          "median": 18,
+          "p90": 26,
+          "best": 33
+        },
+        "turnsMedian": 44,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "19": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 17,
+        "losses": 183,
+        "stalled": 0,
+        "winRate": 0.085,
+        "winRate95": [
+          0.05374529946985246,
+          0.13189688544235392
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 1,
+          "p90": 4,
+          "best": 9
+        },
+        "turnsMedian": 45,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 2
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 156,
+        "losses": 44,
+        "stalled": 0,
+        "winRate": 0.78,
+        "winRate95": [
+          0.7176107720803744,
+          0.8318354646053661
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 5,
+          "p90": 9,
+          "best": 19
+        },
+        "turnsMedian": 41,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 191,
+        "losses": 9,
+        "stalled": 0,
+        "winRate": 0.955,
+        "winRate95": [
+          0.9167024063390322,
+          0.9761477282752958
+        ],
+        "remaining": {
+          "p10": 3,
+          "median": 9,
+          "p90": 14,
+          "best": 20
+        },
+        "turnsMedian": 37,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "20": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 155,
+        "losses": 45,
+        "stalled": 0,
+        "winRate": 0.775,
+        "winRate95": [
+          0.7122575346140798,
+          0.8273771621308439
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 5,
+          "p90": 11,
+          "best": 17
+        },
+        "turnsMedian": 56,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 199,
+        "losses": 1,
+        "stalled": 0,
+        "winRate": 0.995,
+        "winRate95": [
+          0.9722256001302286,
+          0.999116854010634
+        ],
+        "remaining": {
+          "p10": 8,
+          "median": 16,
+          "p90": 22,
+          "best": 29
+        },
+        "turnsMedian": 46,
+        "hintsMedian": 8,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 13,
+          "median": 20,
+          "p90": 26,
+          "best": 33
+        },
+        "turnsMedian": 41,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 0
+      }
+    },
+    "21": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 193,
+        "losses": 7,
+        "stalled": 0,
+        "winRate": 0.965,
+        "winRate95": [
+          0.9295285391333187,
+          0.9829446753626429
+        ],
+        "remaining": {
+          "p10": 2,
+          "median": 8,
+          "p90": 14,
+          "best": 17
+        },
+        "turnsMedian": 48,
+        "hintsMedian": 3,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 12,
+          "median": 18,
+          "p90": 25,
+          "best": 31
+        },
+        "turnsMedian": 38,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 16,
+          "median": 22,
+          "p90": 27,
+          "best": 34
+        },
+        "turnsMedian": 35,
+        "hintsMedian": 3,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "22": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 13,
+          "median": 18,
+          "p90": 24,
+          "best": 33
+        },
+        "turnsMedian": 47,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 23,
+          "median": 28,
+          "p90": 33,
+          "best": 39
+        },
+        "turnsMedian": 38,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 29,
+          "median": 34,
+          "p90": 38,
+          "best": 41
+        },
+        "turnsMedian": 33,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "23": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 158,
+        "losses": 42,
+        "stalled": 0,
+        "winRate": 0.79,
+        "winRate95": [
+          0.7283526118460081,
+          0.8407167047213658
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 5,
+          "p90": 10,
+          "best": 15
+        },
+        "turnsMedian": 55,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 199,
+        "losses": 1,
+        "stalled": 0,
+        "winRate": 0.995,
+        "winRate95": [
+          0.9722256001302286,
+          0.999116854010634
+        ],
+        "remaining": {
+          "p10": 7,
+          "median": 14,
+          "p90": 21,
+          "best": 27
+        },
+        "turnsMedian": 46,
+        "hintsMedian": 8,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 13,
+          "median": 19,
+          "p90": 24,
+          "best": 30
+        },
+        "turnsMedian": 42,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "24": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 125,
+        "losses": 75,
+        "stalled": 0,
+        "winRate": 0.625,
+        "winRate95": [
+          0.5561417515728713,
+          0.6891467469475485
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 4,
+          "p90": 10,
+          "best": 21
+        },
+        "turnsMedian": 48,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 199,
+        "losses": 1,
+        "stalled": 0,
+        "winRate": 0.995,
+        "winRate95": [
+          0.9722256001302286,
+          0.999116854010634
+        ],
+        "remaining": {
+          "p10": 6,
+          "median": 12,
+          "p90": 18,
+          "best": 26
+        },
+        "turnsMedian": 40,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 12,
+          "median": 17,
+          "p90": 23,
+          "best": 29
+        },
+        "turnsMedian": 35,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "25": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 191,
+        "losses": 9,
+        "stalled": 0,
+        "winRate": 0.955,
+        "winRate95": [
+          0.9167024063390322,
+          0.9761477282752958
+        ],
+        "remaining": {
+          "p10": 2,
+          "median": 8,
+          "p90": 14,
+          "best": 19
+        },
+        "turnsMedian": 58,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 199,
+        "losses": 1,
+        "stalled": 0,
+        "winRate": 0.995,
+        "winRate95": [
+          0.9722256001302286,
+          0.999116854010634
+        ],
+        "remaining": {
+          "p10": 10,
+          "median": 19,
+          "p90": 24,
+          "best": 30
+        },
+        "turnsMedian": 47,
+        "hintsMedian": 8,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 17,
+          "median": 23,
+          "p90": 29,
+          "best": 36
+        },
+        "turnsMedian": 43,
+        "hintsMedian": 4,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "26": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 24,
+        "losses": 176,
+        "stalled": 0,
+        "winRate": 0.12,
+        "winRate95": [
+          0.08197935023887545,
+          0.17234361425904846
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 2,
+          "p90": 3,
+          "best": 5
+        },
+        "turnsMedian": 45,
+        "hintsMedian": 3,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 178,
+        "losses": 22,
+        "stalled": 0,
+        "winRate": 0.89,
+        "winRate95": [
+          0.8390720169908702,
+          0.9262280983928396
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 5,
+          "p90": 10,
+          "best": 15
+        },
+        "turnsMedian": 42,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 199,
+        "losses": 1,
+        "stalled": 0,
+        "winRate": 0.995,
+        "winRate95": [
+          0.9722256001302286,
+          0.999116854010634
+        ],
+        "remaining": {
+          "p10": 4,
+          "median": 10,
+          "p90": 15,
+          "best": 21
+        },
+        "turnsMedian": 37,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "27": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 189,
+        "losses": 11,
+        "stalled": 0,
+        "winRate": 0.945,
+        "winRate95": [
+          0.9042120755340645,
+          0.9690149791986299
+        ],
+        "remaining": {
+          "p10": 3,
+          "median": 8,
+          "p90": 15,
+          "best": 23
+        },
+        "turnsMedian": 57,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 13,
+          "median": 19,
+          "p90": 25,
+          "best": 31
+        },
+        "turnsMedian": 47,
+        "hintsMedian": 8,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 18,
+          "median": 25,
+          "p90": 30,
+          "best": 40
+        },
+        "turnsMedian": 41,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 0
+      }
+    },
+    "28": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 183,
+        "losses": 17,
+        "stalled": 0,
+        "winRate": 0.915,
+        "winRate95": [
+          0.8681031145576462,
+          0.9462547005301477
+        ],
+        "remaining": {
+          "p10": 2,
+          "median": 7,
+          "p90": 13,
+          "best": 19
+        },
+        "turnsMedian": 53,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 11,
+          "median": 17,
+          "p90": 24,
+          "best": 30
+        },
+        "turnsMedian": 44,
+        "hintsMedian": 8,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 15,
+          "median": 21,
+          "p90": 27,
+          "best": 34
+        },
+        "turnsMedian": 39,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "29": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 196,
+        "losses": 4,
+        "stalled": 0,
+        "winRate": 0.98,
+        "winRate95": [
+          0.9497121344948062,
+          0.9921956998236058
+        ],
+        "remaining": {
+          "p10": 4,
+          "median": 11,
+          "p90": 17,
+          "best": 26
+        },
+        "turnsMedian": 55,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 14,
+          "median": 21,
+          "p90": 27,
+          "best": 33
+        },
+        "turnsMedian": 45,
+        "hintsMedian": 8,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 20,
+          "median": 27,
+          "p90": 33,
+          "best": 39
+        },
+        "turnsMedian": 39,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "30": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 134,
+        "losses": 66,
+        "stalled": 0,
+        "winRate": 0.67,
+        "winRate95": [
+          0.602165564130804,
+          0.7314267938569671
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 4,
+          "p90": 11,
+          "best": 20
+        },
+        "turnsMedian": 62,
+        "hintsMedian": 5,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 6,
+          "median": 13,
+          "p90": 18,
+          "best": 28
+        },
+        "turnsMedian": 53,
+        "hintsMedian": 9,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 13,
+          "median": 18,
+          "p90": 25,
+          "best": 35
+        },
+        "turnsMedian": 48,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    }
+  },
+  "baseline": {
+    "11": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 130,
+        "losses": 70,
+        "stalled": 0,
+        "winRate": 0.65,
+        "winRate95": [
+          0.5816333576186576,
+          0.712712840605846
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 4,
+          "p90": 9,
+          "best": 14
+        },
+        "turnsMedian": 46,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 197,
+        "losses": 3,
+        "stalled": 0,
+        "winRate": 0.985,
+        "winRate95": [
+          0.9568335194437211,
+          0.9948858548155076
+        ],
+        "remaining": {
+          "p10": 7,
+          "median": 13,
+          "p90": 19,
+          "best": 26
+        },
+        "turnsMedian": 39,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 10,
+          "median": 17,
+          "p90": 23,
+          "best": 29
+        },
+        "turnsMedian": 35,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    },
+    "12": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 197,
+        "losses": 3,
+        "stalled": 0,
+        "winRate": 0.985,
+        "winRate95": [
+          0.9568335194437211,
+          0.9948858548155076
+        ],
+        "remaining": {
+          "p10": 5,
+          "median": 10,
+          "p90": 18,
+          "best": 24
+        },
+        "turnsMedian": 50,
+        "hintsMedian": 3,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 14,
+          "median": 20,
+          "p90": 27,
+          "best": 35
+        },
+        "turnsMedian": 41,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 17,
+          "median": 24,
+          "p90": 32,
+          "best": 39
+        },
+        "turnsMedian": 37,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 0
+      }
+    },
+    "13": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 24,
+        "losses": 176,
+        "stalled": 0,
+        "winRate": 0.12,
+        "winRate95": [
+          0.08197935023887545,
+          0.17234361425904846
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 1,
+          "p90": 4,
+          "best": 6
+        },
+        "turnsMedian": 54,
+        "hintsMedian": 4,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 157,
+        "losses": 43,
+        "stalled": 0,
+        "winRate": 0.785,
+        "winRate95": [
+          0.7229757022632792,
+          0.836282074363278
+        ],
+        "remaining": {
+          "p10": 1,
+          "median": 5,
+          "p90": 10,
+          "best": 15
+        },
+        "turnsMedian": 50,
+        "hintsMedian": 9,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 192,
+        "losses": 8,
+        "stalled": 0,
+        "winRate": 0.96,
+        "winRate95": [
+          0.9230670617058012,
+          0.9795946128493436
+        ],
+        "remaining": {
+          "p10": 4,
+          "median": 9,
+          "p90": 15,
+          "best": 22
+        },
+        "turnsMedian": 47,
+        "hintsMedian": 5,
+        "shufflesMedian": 1,
+        "shufflesP90": 3,
+        "wrongMedian": 0
+      }
+    },
+    "14": {
+      "newcomer": {
+        "runs": 200,
+        "wins": 57,
+        "losses": 143,
+        "stalled": 0,
+        "winRate": 0.285,
+        "winRate95": [
+          0.22694905173277297,
+          0.3511547308121051
+        ],
+        "remaining": {
+          "p10": 0,
+          "median": 1,
+          "p90": 4,
+          "best": 9
+        },
+        "turnsMedian": 44,
+        "hintsMedian": 3,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 3
+      },
+      "regular": {
+        "runs": 200,
+        "wins": 196,
+        "losses": 4,
+        "stalled": 0,
+        "winRate": 0.98,
+        "winRate95": [
+          0.9497121344948062,
+          0.9921956998236058
+        ],
+        "remaining": {
+          "p10": 3,
+          "median": 8,
+          "p90": 12,
+          "best": 16
+        },
+        "turnsMedian": 38,
+        "hintsMedian": 7,
+        "shufflesMedian": 0,
+        "shufflesP90": 1,
+        "wrongMedian": 1
+      },
+      "practiced": {
+        "runs": 200,
+        "wins": 200,
+        "losses": 0,
+        "stalled": 0,
+        "winRate": 1,
+        "winRate95": [
+          0.9811539940816791,
+          1
+        ],
+        "remaining": {
+          "p10": 6,
+          "median": 11,
+          "p90": 16,
+          "best": 20
+        },
+        "turnsMedian": 34,
+        "hintsMedian": 3,
+        "shufflesMedian": 1,
+        "shufflesP90": 2,
+        "wrongMedian": 0
+      }
+    }
+  },
+  "baselineRevision": "84253e0"
+}
