@@ -56,7 +56,7 @@ async function boot() {
   const bg = new Graphics(), tileLayer = new Container(), lines = new Graphics(), effects = new Container();
   app.stage.addChild(bg,tileLayer,lines,effects);
   let game, currentLevel=0, selected=[], hint=[], hintUntil=0, gestures=null, busy=false, muted=false, modal=false, epoch=0;
-  let W=448,H=420,cell=100,gap=9,left=0,bottom=0,views=new Map(),time=0,messageUntil=0,previousStatus='playing',laidOutGame=null,renderedTargetLevel=null,renderedQueueRow;
+  let W=448,H=420,cell=100,gap=9,left=0,bottom=0,views=new Map(),time=0,messageUntil=0,previousStatus='playing',laidOutGame=null,renderedTargetLevel=null,renderedTargetCards=[],renderedCompletionKey=null,renderedQueueRow;
   const tweens=[]; const sounds={};
   for (const name of ['select','merge','wrong','complete','win']) { sounds[name]=new Audio(assetUrl(`/assets/${name}.wav`));sounds[name].volume=name==='select'?.16:.3; }
   function sound(name) { if(muted)return;const a=sounds[name].cloneNode();a.volume=sounds[name].volume;a.play().catch(()=>{}); }
@@ -116,17 +116,24 @@ async function boot() {
     $('progress').textContent=`${game.complete.size} / ${game.level.groups.length}`;
     if(renderedTargetLevel!==game.level){
       $('targets').innerHTML=game.level.groups.map(g=>`<div class="target" title="${escape(g.name)}"><img src="${assetUrl(g.symbol)}" alt=""><div><div class="name">${escape(g.name)}</div><div class="number"><span class="target-value"></span><span class="dot"><i></i></span></div></div></div>`).join('');
-      renderedTargetLevel=game.level;renderedQueueRow=undefined;
+      renderedTargetLevel=game.level;renderedTargetCards=[...$('targets').children];renderedCompletionKey=null;renderedQueueRow=undefined;
     }
     game.level.groups.forEach((_,i)=>{
       const done=game.complete.has(i),largest=done?game.totals[i]:Math.max(0,...game.tiles.filter(t=>t.group===i).map(t=>t.count));
-      const card=$('targets').children[i],value=card.querySelector('.target-value'),bar=card.querySelector('.dot i');
+      const card=renderedTargetCards[i],value=card.querySelector('.target-value'),bar=card.querySelector('.dot i');
       card.classList.toggle('done',done);
       const label=done?'✓':`${largest} / ${game.totals[i]}`;
       if(value.textContent!==label)value.textContent=label;
       const width=`${largest/game.totals[i]*100}%`;
       if(bar.style.width!==width)bar.style.width=width;
     });
+    const completionKey=[...game.complete].sort((a,b)=>a-b).join(',');
+    if(completionKey!==renderedCompletionKey){
+      const targets=$('targets');
+      targets.append(...renderedTargetCards.filter((_,i)=>!game.complete.has(i)),...renderedTargetCards.filter((_,i)=>game.complete.has(i)));
+      targets.scrollLeft=0;
+      renderedCompletionKey=completionKey;
+    }
     const row=game.pending[0]||null;
     if(renderedQueueRow!==row){
       $('queue').innerHTML=(row||[]).map(t=>t.hiddenCounter?`<span class="queue-hidden" aria-label="隐藏图块">?</span>`:t.restriction===7?`<span class="queue-extra" aria-label="加 ${t.extraMoves} 步">+${t.extraMoves}</span>`:`<img src="${assetUrl(game.level.groups[t.group].images[t.image])}" alt="${escape(game.level.groups[t.group].name)}">`).join('');
