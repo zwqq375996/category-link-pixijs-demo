@@ -1,4 +1,4 @@
-# Category Link PixiJS Demo
+# Link&Sort PixiJS Demo
 
 An **unofficial educational demo** of Category Link. This project is not affiliated with or endorsed by the original game's developer. Original game artwork and level data remain the property of their respective owners.
 

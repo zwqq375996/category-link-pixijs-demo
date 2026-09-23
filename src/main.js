@@ -19,8 +19,8 @@ async function boot() {
   const res = await fetch(`${import.meta.env.BASE_URL}levels.json`); if (!res.ok) throw Error('未找到关卡文件，请先运行素材准备脚本。');
   const { levels } = await res.json();
   const appRoot = document.querySelector('#app');
-  appRoot.innerHTML = `<section class="game" aria-label="Category Link 连线归类游戏">
-    <header class="top"><div class="brand"><div class="brand-title">CATEGORY <b>LINK</b></div><div class="level-choice"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
+  appRoot.innerHTML = `<section class="game" aria-label="Link&amp;Sort 连线归类游戏">
+    <header class="top"><div class="brand"><div class="brand-title">Link<b>&amp;Sort</b></div><div class="level-choice"><span class="level-dot"></span><select id="level" aria-label="选择关卡">${levels.map((l,i)=>`<option value="${i}">第 ${l.id} 关</option>`).join('')}</select></div></div><div class="moves-status"><small>剩余步数</small><strong id="moves">—</strong></div><div class="tools-top"><button class="icon-btn" id="sound" aria-label="关闭声音" title="声音">${icon('sound')}</button><button class="icon-btn" id="help" aria-label="玩法说明">${icon('help')}</button></div></header>
     <div class="targets-label"><span>收集所有分类</span><span id="progress">0 / 4</span></div><div class="targets" id="targets" aria-label="分类收集进度"></div>
     <div class="upcoming"><span id="queue-label">待补入</span><div class="queue" id="queue"></div><span class="queue-count" id="queue-count"></span></div>
     <div class="board" id="board" aria-label="游戏棋盘"></div>
